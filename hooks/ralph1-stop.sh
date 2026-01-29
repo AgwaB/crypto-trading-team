@@ -4,7 +4,7 @@
 # Intercepts session exit when ralph1 loop is active
 # Feeds pipeline prompt back to continue autonomous strategy discovery
 
-set -euo pipefail
+set -uo pipefail
 
 HOOK_INPUT=$(cat)
 
@@ -15,35 +15,35 @@ if [[ ! -f "$STATE_FILE" ]]; then
 fi
 
 # Parse frontmatter
-FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$STATE_FILE")
-ITERATION=$(echo "$FRONTMATTER" | grep '^iteration:' | sed 's/iteration: *//')
-MAX_ITERATIONS=$(echo "$FRONTMATTER" | grep '^max_iterations:' | sed 's/max_iterations: *//')
-STRATEGIES_FOUND=$(echo "$FRONTMATTER" | grep '^strategies_found:' | sed 's/strategies_found: *//')
-STRATEGIES_REJECTED=$(echo "$FRONTMATTER" | grep '^strategies_rejected:' | sed 's/strategies_rejected: *//')
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$STATE_FILE") || true
+ITERATION=$(echo "$FRONTMATTER" | grep '^iteration:' | sed 's/iteration: *//' || echo "0")
+MAX_ITERATIONS=$(echo "$FRONTMATTER" | grep '^max_iterations:' | sed 's/max_iterations: *//' || echo "0")
+STRATEGIES_FOUND=$(echo "$FRONTMATTER" | grep '^strategies_found:' | sed 's/strategies_found: *//' || echo "0")
+STRATEGIES_REJECTED=$(echo "$FRONTMATTER" | grep '^strategies_rejected:' | sed 's/strategies_rejected: *//' || echo "0")
 
 # Validate
 if [[ ! "$ITERATION" =~ ^[0-9]+$ ]] || [[ ! "$MAX_ITERATIONS" =~ ^[0-9]+$ ]]; then
   echo "Ralph1: State file corrupted. Loop stopping." >&2
-  rm "$STATE_FILE"
+  rm -f "$STATE_FILE"
   exit 0
 fi
 
 # Check max iterations
 if [[ $MAX_ITERATIONS -gt 0 ]] && [[ $ITERATION -ge $MAX_ITERATIONS ]]; then
   TOTAL=$((STRATEGIES_FOUND + STRATEGIES_REJECTED))
-  echo ""
-  echo "Ralph1 complete: $MAX_ITERATIONS iterations reached."
-  echo "Results: $STRATEGIES_FOUND validated / $STRATEGIES_REJECTED rejected / $TOTAL total"
-  echo "See .crypto/knowledge/registry.yaml for all strategies."
-  rm "$STATE_FILE"
+  echo "" >&2
+  echo "Ralph1 complete: $MAX_ITERATIONS iterations reached." >&2
+  echo "Results: $STRATEGIES_FOUND validated / $STRATEGIES_REJECTED rejected / $TOTAL total" >&2
+  echo "See .crypto/knowledge/registry.yaml for all strategies." >&2
+  rm -f "$STATE_FILE"
   exit 0
 fi
 
 # Read transcript to update counters from last iteration output
-TRANSCRIPT_PATH=$(echo "$HOOK_INPUT" | jq -r '.transcript_path')
+TRANSCRIPT_PATH=$(echo "$HOOK_INPUT" | jq -r '.transcript_path' 2>/dev/null || echo "")
 
-if [[ -f "$TRANSCRIPT_PATH" ]]; then
-  LAST_LINE=$(grep '"role":"assistant"' "$TRANSCRIPT_PATH" | tail -1)
+if [[ -n "$TRANSCRIPT_PATH" ]] && [[ -f "$TRANSCRIPT_PATH" ]]; then
+  LAST_LINE=$(grep '"role":"assistant"' "$TRANSCRIPT_PATH" | tail -1 || true)
   if [[ -n "$LAST_LINE" ]]; then
     LAST_OUTPUT=$(echo "$LAST_LINE" | jq -r '
       .message.content |
@@ -69,7 +69,7 @@ PROMPT_TEXT=$(awk '/^---$/{i++; next} i>=2' "$STATE_FILE")
 
 if [[ -z "$PROMPT_TEXT" ]]; then
   echo "Ralph1: State file corrupted. Loop stopping." >&2
-  rm "$STATE_FILE"
+  rm -f "$STATE_FILE"
   exit 0
 fi
 
@@ -85,6 +85,7 @@ mv "$TEMP_FILE" "$STATE_FILE"
 TOTAL=$((STRATEGIES_FOUND + STRATEGIES_REJECTED))
 SYSTEM_MSG="Ralph1 iteration $NEXT_ITERATION | Found: $STRATEGIES_FOUND | Rejected: $STRATEGIES_REJECTED | Total: $TOTAL$(if [[ $MAX_ITERATIONS -gt 0 ]]; then echo " / $MAX_ITERATIONS max"; fi)"
 
+# Output ONLY the JSON to stdout — everything else goes to stderr
 jq -n \
   --arg prompt "$PROMPT_TEXT" \
   --arg msg "$SYSTEM_MSG" \
