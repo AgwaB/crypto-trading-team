@@ -1,0 +1,9 @@
+{
+  "name": "crypto",
+  "version": "0.2.0",
+  "description": "World-class crypto trading team: 10 specialized LLM agents for autonomous strategy research, backtesting, risk management, and execution.",
+  "author": {
+    "name": "toby"
+  },
+  "license": "MIT"
+}

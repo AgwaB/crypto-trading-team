@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); COMMAND=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty'); if echo \"$COMMAND\" | grep -iE '(ccxt|exchange|api_key|secret|mainnet|live.*trade|submit.*order|place.*order)' > /dev/null 2>&1; then echo '⚠️  SAFETY: This command may interact with a live exchange. Verify this is intentional.' >&2; fi; exit 0"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[Trading Team] Session ending. Reminder: Check pipeline/current-run.yaml for any in-progress work.' >&2; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
