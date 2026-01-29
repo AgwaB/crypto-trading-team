@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[Trading Team] Session ending. Reminder: Check pipeline/current-run.yaml for any in-progress work.' >&2; exit 0"
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/ralph1-stop.sh"
           }
         ]
       }

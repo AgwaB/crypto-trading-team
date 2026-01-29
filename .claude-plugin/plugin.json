@@ -1,6 +1,6 @@
 {
   "name": "crypto",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "World-class crypto trading team: 10 specialized LLM agents for autonomous strategy research, backtesting, risk management, and execution.",
   "author": {
     "name": "toby"

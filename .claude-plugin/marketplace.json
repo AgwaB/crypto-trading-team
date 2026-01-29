@@ -9,7 +9,7 @@
     {
       "name": "crypto",
       "description": "10 specialized LLM agents for autonomous crypto trading strategy research, backtesting, and execution.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "toby"
       },
