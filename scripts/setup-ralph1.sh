@@ -126,8 +126,9 @@ Running total: {validated}/{rejected}/{total}
 \`\`\`
 EOF
 
-# Output setup message
+# Output setup message with session marker (hook checks for this)
 cat <<EOF
+<!-- RALPH1-SESSION-ACTIVE -->
 Crypto Ralph1 activated — autonomous strategy discovery loop.
 
 Iteration: 1

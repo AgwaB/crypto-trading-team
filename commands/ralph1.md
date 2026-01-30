@@ -34,3 +34,7 @@ You are now in an autonomous strategy discovery loop. Each iteration runs the fu
 7. **Record** → update registry + BOOTSTRAP + learnings
 
 When the stop hook fires, it feeds this prompt back. Your previous work is saved in `.crypto/` files. Pick up where you left off and evaluate the next strategy.
+
+## Ending the Loop
+
+If you determine there are no more viable strategies to explore (all data exhausted, all approaches tested), output `<ralph1-complete>` and the loop will cleanly terminate with a summary. Do NOT just stop — always use the tag so the state file is properly cleaned up.
