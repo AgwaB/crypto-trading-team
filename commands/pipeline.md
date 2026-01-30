@@ -8,6 +8,7 @@ Run the full autonomous pipeline from ideation through validated backtest.
 
 ## Arguments
 - Strategy idea (e.g., "funding rate arbitrage") → use as starting point
+- `ml:` prefix (e.g., "ml: 4h BTC direction prediction") → use ML path instead of rule-based
 - `continue` → pick next from `.crypto/pipeline/queue.yaml`
 - No argument → researcher proposes based on gaps
 
@@ -15,7 +16,9 @@ Run the full autonomous pipeline from ideation through validated backtest.
 
 ### Phase 1: Ideation (Auto)
 1. Bootstrap: Read `.crypto/BOOTSTRAP.md`, `.crypto/knowledge/registry.yaml`, `.crypto/knowledge/learnings.md`, `.crypto/config/thresholds.yaml`
-2. Delegate to `trading-strategy-researcher` → outputs `.crypto/knowledge/strategies/STR-{NNN}/hypothesis.md` + `parameters.yaml`
+2. **Route by type:**
+   - **Rule-based** (default): Delegate to `trading-strategy-researcher` → outputs `hypothesis.md` + `parameters.yaml`
+   - **ML-based** (`ml:` prefix): Delegate to `trading-ml-engineer` → outputs `ml-spec.yaml`, `features.yaml`, `ml-report.md`, `code/ml_strategy_{name}.py`
 3. Delegate to `trading-quant-analyst` → outputs `quant-review.md`. If NOT FEASIBLE → auto-reject.
 4. Delegate to `trading-data-collector` → outputs `data-spec.yaml`. If unavailable → auto-reject.
 

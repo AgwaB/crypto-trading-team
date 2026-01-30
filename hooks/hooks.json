@@ -9,6 +9,15 @@
             "command": "INPUT=$(cat); COMMAND=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty'); if echo \"$COMMAND\" | grep -iE '(ccxt|exchange|api_key|secret|mainnet|live.*trade|submit.*order|place.*order)' > /dev/null 2>&1; then echo '⚠️  SAFETY: This command may interact with a live exchange. Verify this is intentional.' >&2; fi; exit 0"
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CONTENT=$(echo \"$INPUT\" | jq -r '.tool_input.content // empty'); if echo \"$CONTENT\" | grep -iE '(KFold|ShuffleSplit|train_test_split.*shuffle.*True|shift\\(-[0-9])' > /dev/null 2>&1; then echo '⚠️  ML SAFETY: Detected potential data leakage pattern. Use TimeSeriesSplit for time-series data, never random splits or future-looking shifts.' >&2; fi; exit 0"
+          }
+        ]
       }
     ],
     "Stop": [
