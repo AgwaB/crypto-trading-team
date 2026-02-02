@@ -1,7 +1,7 @@
 {
   "name": "crypto",
-  "version": "0.5.0",
-  "description": "World-class crypto trading team: 10 specialized LLM agents for autonomous strategy research, backtesting, risk management, and execution.",
+  "version": "0.6.0",
+  "description": "World-class crypto trading team: 14 specialized LLM agents (including 2 junior creative agents) with tiered validation (L0-L3), active learning injection, deduplication engine, and continuous strategy discovery meetings.",
   "author": {
     "name": "toby"
   },
