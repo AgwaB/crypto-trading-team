@@ -1,6 +1,6 @@
 ---
-description: "Autonomous strategy discovery loop with tiered validation (Phase 0-2)"
-argument-hint: "[--max-iterations N] [FOCUS_AREA]"
+description: "Autonomous strategy discovery loop with tiered validation (Phase 0-2). Use --never-end for 24/7 mode."
+argument-hint: "[--never-end] [--max-iterations N] [FOCUS_AREA]"
 allowed-tools: ["Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup-ralph1.sh:*)"]
 ---
 
