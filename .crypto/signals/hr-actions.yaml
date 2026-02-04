@@ -1,0 +1,51 @@
+# HR Actions Signal File
+#
+# This file is written by performance reviews and retrospectives
+# to signal recommended HR actions to the orchestrator.
+#
+# Format:
+# actions:
+#   - type: [hire|fire|promote|probation]
+#     agent: agent-name (or null for hire)
+#     reason: explanation
+#     priority: [immediate|recommended|optional]
+#     triggered_by: [review|retrospective|manual]
+#     timestamp: ISO 8601
+#     status: [pending|approved|rejected|completed]
+
+actions: []
+
+# Example entries:
+#
+# - type: fire
+#   agent: trading-junior-example
+#   reason: "Score <0.3 for 3 consecutive cycles"
+#   priority: immediate
+#   triggered_by: review
+#   timestamp: "2026-02-05T10:30:00Z"
+#   status: pending
+#
+# - type: hire
+#   agent: null
+#   role: "options specialist"
+#   reason: "Capacity gap in volatility analysis"
+#   priority: recommended
+#   triggered_by: retrospective
+#   timestamp: "2026-02-05T10:35:00Z"
+#   status: pending
+#
+# - type: promote
+#   agent: signal-generator
+#   reason: "Score >0.85 for 3 cycles, leadership demonstrated"
+#   priority: recommended
+#   triggered_by: review
+#   timestamp: "2026-02-05T10:40:00Z"
+#   status: approved
+#
+# - type: probation
+#   agent: backtester
+#   reason: "Score dropped to 0.28 this cycle"
+#   priority: immediate
+#   triggered_by: retrospective
+#   timestamp: "2026-02-05T10:45:00Z"
+#   status: pending

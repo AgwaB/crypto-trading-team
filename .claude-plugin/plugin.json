@@ -1,7 +1,7 @@
 {
   "name": "crypto",
-  "version": "0.8.0",
-  "description": "World-class crypto trading team: 17 specialized LLM agents with organized folder structure, tiered validation (L0-L3), 24/7 never-end mode (External Scout + Strategy Mutator), active learning injection, and continuous strategy discovery.",
+  "version": "0.9.0",
+  "description": "Self-managing crypto trading company: 20 LLM agents (3 team leads + 17 specialists) with team hierarchy, automated retrospectives, performance scoring, dynamic hiring/firing, and 24/7 autonomous operation.",
   "author": {
     "name": "toby"
   },

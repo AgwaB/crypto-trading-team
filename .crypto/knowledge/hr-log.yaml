@@ -1,0 +1,77 @@
+# HR Action History Log
+#
+# Permanent record of all hiring, firing, promotion, and probation actions.
+# Used for workforce analytics and decision-making patterns.
+
+metadata:
+  created: "2026-02-05T10:00:00Z"
+  total_hires: 0
+  total_fires: 0
+  total_promotions: 0
+  total_probations: 0
+  current_workforce_size: 0
+
+actions: []
+
+# Schema:
+# - action_id: unique identifier
+#   type: [hire|fire|promote|probation|reactivate]
+#   timestamp: ISO 8601
+#   agent: agent name
+#   role: agent role
+#   team: team assignment
+#   triggered_by: [orchestrator|review|retrospective|manual]
+#   reason: explanation
+#   performance_data:
+#     last_score: float
+#     avg_score_3_cycles: float
+#     probation_status: bool
+#     cycles_active: int
+#   outcome: [completed|reversed|cancelled]
+#   notes: additional context
+
+# Example entries will be added as actions occur:
+#
+# - action_id: "HR-001"
+#   type: hire
+#   timestamp: "2026-02-05T11:00:00Z"
+#   agent: "trading-options-specialist"
+#   role: "Specialist"
+#   team: "research"
+#   triggered_by: orchestrator
+#   reason: "New capability needed for volatility surface analysis"
+#   performance_data: null  # New hire
+#   outcome: completed
+#   notes: "Started with 5-strategy probation period"
+#
+# - action_id: "HR-002"
+#   type: fire
+#   timestamp: "2026-02-05T11:30:00Z"
+#   agent: "trading-junior-example"
+#   role: "Junior"
+#   team: "research"
+#   triggered_by: review
+#   reason: "Failed probation - score <0.2 for 10 strategies"
+#   performance_data:
+#     last_score: 0.18
+#     avg_score_3_cycles: 0.22
+#     probation_status: true
+#     cycles_active: 10
+#   outcome: completed
+#   notes: "Agent struggled with market context understanding"
+#
+# - action_id: "HR-003"
+#   type: promote
+#   timestamp: "2026-02-05T12:00:00Z"
+#   agent: "signal-generator"
+#   role: "Team Lead"
+#   team: "research"
+#   triggered_by: review
+#   reason: "Consistent excellence and leadership potential"
+#   performance_data:
+#     last_score: 0.89
+#     avg_score_3_cycles: 0.87
+#     probation_status: false
+#     cycles_active: 25
+#   outcome: completed
+#   notes: "Promoted to trading-research-lead"

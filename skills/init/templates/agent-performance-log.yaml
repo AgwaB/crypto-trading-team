@@ -1,0 +1,21 @@
+# Agent Performance Log
+# Append-only log of all agent actions
+# Used for retrospectives and performance calculations
+
+version: "1.0"
+created: null
+
+# Log entries are appended here
+log: []
+
+# Example entry format:
+# - timestamp: 2026-02-05T10:00:00Z
+#   agent: trading-quant-analyst
+#   action: reviewed_strategy
+#   strategy_id: STR-089
+#   outcome: approved  # approved | rejected | error
+#   time_taken_minutes: 15
+#   context:
+#     learning_used: true
+#     violations: []
+#   notes: null

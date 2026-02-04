@@ -1,0 +1,37 @@
+name: "trading-{domain}-specialist"
+description: "{Domain} specialist for {purpose}"
+model: "sonnet"  # Default tier
+team: null  # Assign during creation
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+role: "Specialist"
+status: "probation"
+probation_period: 5  # strategies
+
+# Template Instructions
+# 1. Replace {domain} with specialty area (e.g., "options", "sentiment", "macro")
+# 2. Replace {purpose} with specific function
+# 3. Assign to appropriate team (research, validation, execution)
+# 4. Customize tools if needed for specialty
+# 5. Set model tier based on complexity (haiku/sonnet/opus)
+
+# Example Usage:
+# name: "trading-options-specialist"
+# description: "Options data specialist for volatility analysis"
+# team: "research"
+# model: "sonnet"
+
+# Probation Rules:
+# - Monitor for first 5 strategy runs
+# - Score must average >0.4 to pass probation
+# - Automatic promotion to "active" status if passing
+# - Consider firing if score <0.2 during probation
+
+# Performance Expectations:
+# - L0 pass rate: >30% during probation
+# - L1 improvement: >15% from baseline
+# - Learning compliance: <2 violations per cycle
+# - Response time: <5min average

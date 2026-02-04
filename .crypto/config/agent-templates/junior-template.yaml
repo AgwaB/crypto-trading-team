@@ -1,0 +1,55 @@
+name: "trading-junior-{name}"
+description: "Junior agent for {purpose}"
+model: "haiku"  # Always haiku for juniors
+team: "research"  # Juniors always start in research
+tools:
+  - Read
+  - Grep
+  - Glob
+role: "Junior"
+status: "probation"
+probation_period: 10  # strategies (longer for juniors)
+
+# Special Instructions for Juniors
+special_instructions: |
+  - Encouraged to propose wild, unconventional ideas
+  - Not penalized for rejected ideas or failed experiments
+  - Evaluated on novelty and creativity, not success rate
+  - Expected to challenge conventional wisdom
+  - Can propose strategies outside normal constraints
+  - Protected from normal performance metrics during probation
+
+# Black Swan Philosophy
+# Juniors are the "black swan generators" - hired specifically to:
+# 1. Think differently from experienced specialists
+# 2. Propose strategies that seem crazy but might work
+# 3. Challenge assumptions of senior agents
+# 4. Explore unconventional market edges
+
+# Template Instructions
+# 1. Replace {name} with unique identifier (e.g., "maverick", "wildcard", "iconoclast")
+# 2. Replace {purpose} with creative focus area
+# 3. Keep model as "haiku" (cost control for experimental ideas)
+# 4. Always assign to "research" team initially
+# 5. Pair with senior mentor for guidance
+
+# Example Usage:
+# name: "trading-junior-maverick"
+# description: "Junior agent for contrarian market hypotheses"
+# team: "research"
+# model: "haiku"
+
+# Probation Rules (Different for Juniors):
+# - Monitor for first 10 strategy runs
+# - NOT evaluated on L0 pass rate or profitability
+# - Evaluated on: idea novelty, learning speed, creative thinking
+# - Score calculation weights creativity over accuracy
+# - Pass probation if: novelty score >0.5 OR one major insight
+# - Fire only if: no original ideas OR severe learning violations
+
+# Performance Expectations:
+# - Novel ideas per cycle: >3
+# - Idea adoption rate: >10% (by senior agents)
+# - Learning compliance: <3 violations per cycle
+# - Mentor engagement: Active participation in reviews
+# - Risk-taking: Expected to be high (not penalized)

@@ -1,5 +1,16 @@
 {
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "# Log agent delegation to performance log\n# This runs after every Task tool use to track agent actions\necho \"[$(date -Iseconds)] Task delegated\" >> /tmp/crypto-agent-log.txt 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -16,6 +27,10 @@
           {
             "type": "command",
             "command": "INPUT=$(cat); CONTENT=$(echo \"$INPUT\" | jq -r '.tool_input.content // empty'); if echo \"$CONTENT\" | grep -iE '(KFold|ShuffleSplit|train_test_split.*shuffle.*True|shift\\(-[0-9])' > /dev/null 2>&1; then echo '⚠️  ML SAFETY: Detected potential data leakage pattern. Use TimeSeriesSplit for time-series data, never random splits or future-looking shifts.' >&2; fi; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "# Check for retrospective trigger (every 5 pipeline runs)\nINPUT=$(cat); FILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty'); if echo \"$FILE_PATH\" | grep -q 'registry.yaml'; then\n  STATE_FILE=\"$HOME/.crypto/never-end-state.md\"\n  if [ -f \"$STATE_FILE\" ]; then\n    RUNS=$(grep -oP 'pipeline_runs:\\s*\\K\\d+' \"$STATE_FILE\" 2>/dev/null || echo 0)\n    if [ $((RUNS % 5)) -eq 0 ] && [ \"$RUNS\" -gt 0 ]; then\n      mkdir -p \"$HOME/.crypto/signals\" 2>/dev/null || true\n      echo \"SIGNAL:RETROSPECTIVE\" > \"$HOME/.crypto/signals/retrospective-trigger\" 2>/dev/null || true\n    fi\n    if [ $((RUNS % 10)) -eq 0 ] && [ \"$RUNS\" -gt 0 ]; then\n      mkdir -p \"$HOME/.crypto/signals\" 2>/dev/null || true\n      echo \"SIGNAL:PERFORMANCE_REVIEW\" > \"$HOME/.crypto/signals/review-trigger\" 2>/dev/null || true\n    fi\n  fi\nfi; exit 0"
           }
         ]
       }
@@ -26,6 +41,10 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/never-end-stop.sh"
+          },
+          {
+            "type": "command",
+            "command": "# Check for pending HR signals\nSIGNAL_DIR=\"$HOME/.crypto/signals\"\nif [ -f \"$SIGNAL_DIR/retrospective-trigger\" ]; then\n  echo '[SIGNAL] Retrospective pending - run /crypto:retrospective'\n  rm \"$SIGNAL_DIR/retrospective-trigger\" 2>/dev/null || true\nfi\nif [ -f \"$SIGNAL_DIR/review-trigger\" ]; then\n  echo '[SIGNAL] Performance review pending - run /crypto:hr review'\n  rm \"$SIGNAL_DIR/review-trigger\" 2>/dev/null || true\nfi\nif [ -f \"$SIGNAL_DIR/hr-actions.yaml\" ]; then\n  ACTIONS=$(cat \"$SIGNAL_DIR/hr-actions.yaml\" 2>/dev/null | grep -c 'action:' || echo 0)\n  if [ \"$ACTIONS\" -gt 0 ]; then\n    echo \"[SIGNAL] $ACTIONS HR action(s) pending - run /crypto:hr status\"\n  fi\nfi"
           }
         ]
       }

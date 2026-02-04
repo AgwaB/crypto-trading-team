@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "crypto",
-      "description": "17 specialized LLM agents for autonomous crypto trading strategy research, backtesting, and execution.",
-      "version": "0.8.0",
+      "description": "Self-managing crypto trading company: 20 LLM agents with team hierarchy, automated retrospectives, performance scoring, and 24/7 autonomous operation.",
+      "version": "0.9.0",
       "author": {
         "name": "toby"
       },

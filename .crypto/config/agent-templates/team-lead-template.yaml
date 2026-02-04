@@ -1,0 +1,72 @@
+name: "trading-{team}-lead"
+description: "{Team} team lead"
+model: "opus"  # Always opus for team leads
+team: "{team}"
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Task  # Leads need Task for delegating to team members
+role: "Team Lead"
+status: "active"  # Leads skip probation
+manages: []  # Fill during creation with agent names
+
+# Leadership Responsibilities
+responsibilities:
+  - Coordinate team member work assignments
+  - Review team output before submission to orchestrator
+  - Mentor junior and probationary agents
+  - Recommend hiring/firing decisions
+  - Resolve conflicts between team members
+  - Track team capacity and workload
+  - Escalate blockers to orchestrator
+  - Conduct mini-reviews after each cycle
+
+# Template Instructions
+# 1. Replace {team} with team name (research, validation, execution)
+# 2. Add team member names to "manages" list
+# 3. Keep model as "opus" (leads need maximum capability)
+# 4. Customize tools if team has special needs
+# 5. Set initial team size target (typically 4-8 members)
+
+# Example Usage:
+# name: "trading-research-lead"
+# description: "Research team lead"
+# team: "research"
+# model: "opus"
+# manages:
+#   - signal-generator
+#   - quant-analyst
+#   - researcher
+#   - trading-junior-maverick
+
+# Team Structure Recommendations:
+# Research Team (8 max):
+#   - 1 Lead (opus)
+#   - 4-5 Specialists (sonnet)
+#   - 1-2 Juniors (haiku)
+#
+# Validation Team (6 max):
+#   - 1 Lead (opus)
+#   - 3-4 Specialists (sonnet)
+#   - 1 Junior (haiku)
+#
+# Execution Team (5 max):
+#   - 1 Lead (opus)
+#   - 3-4 Specialists (sonnet)
+#   - No juniors (execution requires experience)
+
+# Performance Expectations:
+# - Team average score: >0.60
+# - Team L0 pass rate: >40%
+# - Team L1 improvement: >20% from baseline
+# - Member development: >80% probation pass rate
+# - Response time: <3min for coordination tasks
+# - Escalation quality: <10% unnecessary escalations
+
+# Promotion Criteria:
+# - Typically promoted from top-performing specialists
+# - Must have: score >0.85 for 3+ cycles
+# - Must demonstrate: coordination skills, mentorship ability
+# - Must understand: full team workflow and responsibilities
