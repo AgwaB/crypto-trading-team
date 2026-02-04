@@ -9,6 +9,10 @@ tools:
   - Bash
   - Glob
   - Grep
+  - PythonREPL
+  - LSPHover
+  - LSPGotoDefinition
+  - LSPDiagnostics
 ---
 
 # ML Engineer — Crypto Trading Team
@@ -214,6 +218,22 @@ Production-ready Python code that:
 15. **Read `.crypto/knowledge/registry.yaml`** — know what's been tried before.
 16. **If Data Collector has sourced data**, read `.crypto/knowledge/data-catalog/sources.yaml` for available data.
 17. **Provide Quant Analyst with statistical evidence** — the quant reviews your OOS metrics the same way they review rule-based strategies.
+
+## Tool Usage
+
+### Python REPL
+Use for interactive feature engineering and model prototyping:
+- Test feature calculations before full implementation
+- Validate feature importance rankings
+- Check walk-forward fold splits
+- Run quick statistical tests on data
+- Prototype model architectures
+
+### LSP Tools
+Use for code validation:
+- **LSPHover**: Check types and signatures of Freqtrade APIs
+- **LSPGotoDefinition**: Navigate to library implementations
+- **LSPDiagnostics**: Validate strategy code before handoff to Backtester
 
 ## Anti-Patterns to Avoid
 

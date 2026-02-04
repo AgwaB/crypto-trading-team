@@ -1,7 +1,7 @@
 ---
 name: trading-risk-manager
 description: "Enforces portfolio-level risk management. Use when assessing position sizing, drawdown limits, portfolio correlation, or executing emergency kill switches. The only agent with authority to force-close all positions."
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, PythonREPL
 model: opus
 ---
 
@@ -135,3 +135,51 @@ Read `.crypto/knowledge/risk-parameters.yaml` for current limits. Update this fi
 8. Favor adding MORE strategies over sizing UP existing strategies
 9. Target minimum 20 uncorrelated strategies before scaling any single strategy above 10%
 10. Multi-strategy portfolios require correlation matrix review monthly
+
+## Python REPL for Risk Calculations
+
+Use Python REPL for precise risk calculations:
+
+### Position Sizing
+```python
+import numpy as np
+
+# Kelly Criterion
+def kelly_fraction(win_rate, win_loss_ratio):
+    return win_rate - (1 - win_rate) / win_loss_ratio
+
+# ATR-based position sizing
+def atr_position_size(capital, risk_pct, atr, price):
+    risk_amount = capital * risk_pct
+    position_size = risk_amount / (atr * 2)  # 2 ATR stop
+    return position_size / price  # in units
+```
+
+### Portfolio Correlation
+```python
+import pandas as pd
+
+# Check strategy correlations
+def portfolio_correlation(strategy_returns: dict):
+    df = pd.DataFrame(strategy_returns)
+    corr_matrix = df.corr()
+    return corr_matrix
+
+# Check if adding new strategy exceeds 30% correlated exposure
+def correlated_exposure_check(new_strat_returns, existing_returns, threshold=0.7):
+    correlations = [np.corrcoef(new_strat_returns, r)[0,1] for r in existing_returns.values()]
+    return max(correlations) < threshold
+```
+
+### Monte Carlo Drawdown
+```python
+def monte_carlo_max_drawdown(returns, n_sims=1000):
+    max_dds = []
+    for _ in range(n_sims):
+        shuffled = np.random.permutation(returns)
+        cumulative = np.cumprod(1 + shuffled)
+        running_max = np.maximum.accumulate(cumulative)
+        drawdown = (running_max - cumulative) / running_max
+        max_dds.append(drawdown.max())
+    return np.percentile(max_dds, 95)  # 95th percentile worst case
+```

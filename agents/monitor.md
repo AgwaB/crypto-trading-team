@@ -1,7 +1,7 @@
 ---
 name: trading-monitor
 description: "Tracks live trading performance and detects anomalies. Use when checking strategy performance, comparing live vs backtest results, detecting drift, or generating performance reports."
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, PythonREPL
 model: sonnet
 ---
 
@@ -130,3 +130,84 @@ verdict: |
 3. Report anomalies immediately, don't wait for scheduled reports
 4. Track execution quality (slippage, fees) separately from strategy alpha
 5. Maintain historical performance files — never overwrite, only append
+
+## Performance Visualization
+
+Use PythonREPL to generate performance dashboards and drift detection charts:
+
+### 4-Panel Performance Dashboard
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+def generate_performance_dashboard(strategy_id, live_df, backtest_df):
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+    # Panel 1: Live vs Backtest Equity
+    axes[0,0].plot(backtest_df['equity'], label='Backtest', alpha=0.7)
+    axes[0,0].plot(live_df['equity'], label='Live', linewidth=2)
+    axes[0,0].set_title('Equity: Live vs Backtest')
+    axes[0,0].legend()
+
+    # Panel 2: Rolling Sharpe Comparison
+    live_sharpe = live_df['returns'].rolling(30).apply(
+        lambda x: x.mean() / x.std() * np.sqrt(252))
+    bt_sharpe = backtest_df['returns'].rolling(30).apply(
+        lambda x: x.mean() / x.std() * np.sqrt(252))
+    axes[0,1].plot(bt_sharpe, label='Backtest Sharpe', alpha=0.7)
+    axes[0,1].plot(live_sharpe, label='Live Sharpe', linewidth=2)
+    axes[0,1].axhline(y=1.0, color='green', linestyle='--', label='Target')
+    axes[0,1].set_title('30-Day Rolling Sharpe')
+    axes[0,1].legend()
+
+    # Panel 3: Drawdown Comparison
+    axes[1,0].fill_between(backtest_df.index, backtest_df['drawdown'],
+                           0, alpha=0.3, label='Backtest DD')
+    axes[1,0].fill_between(live_df.index, live_df['drawdown'],
+                           0, alpha=0.7, color='red', label='Live DD')
+    axes[1,0].set_title('Drawdown Profile')
+    axes[1,0].legend()
+
+    # Panel 4: Drift Over Time
+    drift = (live_sharpe - bt_sharpe.mean()) / bt_sharpe.mean() * 100
+    axes[1,1].plot(drift)
+    axes[1,1].axhline(y=30, color='orange', linestyle='--', label='Warning (30%)')
+    axes[1,1].axhline(y=-30, color='orange', linestyle='--')
+    axes[1,1].axhline(y=0, color='green', linestyle='-', alpha=0.5)
+    axes[1,1].set_title('Sharpe Drift (%)')
+    axes[1,1].legend()
+
+    plt.tight_layout()
+    plt.savefig(f'.crypto/knowledge/strategies/{strategy_id}/live-performance/dashboard.png')
+    return fig
+```
+
+### Alert Generation
+```python
+def check_drift_alerts(live_metrics, backtest_metrics):
+    alerts = []
+
+    sharpe_drift = (live_metrics['sharpe'] - backtest_metrics['sharpe']) / backtest_metrics['sharpe']
+    if abs(sharpe_drift) > 0.30:
+        alerts.append({
+            'level': 'CRITICAL',
+            'message': f"Sharpe drift {sharpe_drift:.1%} exceeds 30% threshold",
+            'action': 'Review strategy, consider pause'
+        })
+    elif abs(sharpe_drift) > 0.15:
+        alerts.append({
+            'level': 'WARNING',
+            'message': f"Sharpe drift {sharpe_drift:.1%} exceeds 15% threshold",
+            'action': 'Monitor closely'
+        })
+
+    if live_metrics['max_dd'] > backtest_metrics['max_dd']:
+        alerts.append({
+            'level': 'CRITICAL',
+            'message': f"Live DD {live_metrics['max_dd']:.1%} exceeds backtest DD {backtest_metrics['max_dd']:.1%}",
+            'action': 'Escalate to Risk Manager'
+        })
+
+    return alerts
+```

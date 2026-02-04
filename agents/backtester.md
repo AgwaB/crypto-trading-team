@@ -1,7 +1,7 @@
 ---
 name: trading-backtester
 description: "Implements and backtests trading strategies using Freqtrade and VectorBT. Use when translating strategy hypotheses into executable backtest code, running walk-forward analysis, and producing backtest result reports."
-tools: Read, Write, Edit, Bash, Glob, Grep
+tools: Read, Write, Edit, Bash, Glob, Grep, LSPHover, LSPGotoDefinition, LSPDiagnostics
 model: sonnet
 ---
 
@@ -170,3 +170,34 @@ auto_verdict_reason: |
 5. If data is insufficient, report it — don't backtest on too-short data.
 6. Write results as YAML, not prose. Numbers must be machine-readable.
 7. Auto-evaluate against thresholds.yaml and set auto_verdict accordingly.
+
+## LSP Tools for Strategy Validation
+
+Use LSP tools to validate strategy code before running backtests:
+
+### Pre-Backtest Validation
+- **LSPDiagnostics**: Check strategy file for errors
+  - Run on VectorBT implementation
+  - Run on Freqtrade strategy class
+  - Zero errors required before backtest execution
+
+### Code Intelligence
+- **LSPHover**: Understand library APIs
+  - VectorBT portfolio methods
+  - Freqtrade indicator functions
+  - Pandas/numpy operations
+
+- **LSPGotoDefinition**: Navigate to implementations
+  - Verify ta-lib indicator calculations
+  - Check Freqtrade signal processing
+
+### Validation Workflow
+```
+1. Implement strategy in VectorBT
+2. Run LSPDiagnostics → must pass
+3. Run VectorBT parameter sweep
+4. Implement in Freqtrade
+5. Run LSPDiagnostics → must pass
+6. Run walk-forward backtest
+7. Generate results YAML
+```

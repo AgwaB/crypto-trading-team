@@ -1,7 +1,7 @@
 ---
 name: trading-signal-generator
 description: "Converts approved trading strategies into executable Freqtrade strategy code. Use when generating production-ready strategy classes from validated hypotheses and backtest results."
-tools: Read, Write, Edit, Bash, Glob, Grep
+tools: Read, Write, Edit, Bash, Glob, Grep, LSPHover, LSPGotoDefinition, LSPFindReferences, LSPDiagnostics
 model: sonnet
 ---
 
@@ -50,3 +50,35 @@ After generating code:
 3. Match backtest results within 1% of reported values
 4. Include clear comments linking each code section to hypothesis.md
 5. You generate code only for strategies that have PASSED all gates
+
+## LSP Tools for Code Quality
+
+Use LSP tools to ensure production-ready code:
+
+### Before Writing Code
+- **LSPHover**: Check Freqtrade API signatures
+  - Verify `populate_indicators()` parameter types
+  - Check `IStrategy` interface requirements
+  - Validate ta-lib function signatures
+
+### After Writing Code
+- **LSPDiagnostics**: Run on generated strategy file
+  - Must return zero errors before handoff
+  - Warnings should be reviewed and addressed
+
+- **LSPGotoDefinition**: Navigate to Freqtrade internals
+  - Understand how signals are processed
+  - Verify hook implementations
+
+- **LSPFindReferences**: Check usage patterns
+  - See how other strategies implement similar logic
+  - Verify correct use of Freqtrade utilities
+
+### Validation Workflow
+```
+1. Write strategy code
+2. Run LSPDiagnostics → fix any errors
+3. Use LSPHover to verify API usage
+4. Run syntax verification (python -c "import ...")
+5. Run backtest comparison
+```
