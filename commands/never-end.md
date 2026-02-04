@@ -32,14 +32,14 @@ First, check if `.crypto/never-end-state.md` exists.
    ```
 
 3. **ASK the user using AskUserQuestion tool:**
-   - Question: "Resume previous session or start fresh?"
+   - Question: "Previous session found. How would you like to proceed?"
    - Options:
-     - **Resume**: Continue from iteration {iteration + 1} with existing counters
-     - **Start Fresh**: Reset all counters and start from iteration 1
+     - **Resume**: Continue from iteration {iteration + 1} with existing counters preserved
+     - **Reset Counters**: Start from iteration 1 (counters only - all strategies and learnings are preserved)
 
 4. Based on user choice:
    - **Resume**: Keep the existing state file, increment iteration by 1, proceed to Critical Rules
-   - **Start Fresh**: Create new state file (see below)
+   - **Reset Counters**: Create new state file with fresh counters (see below) - all knowledge files remain intact
 
 **If the file does NOT exist OR `--fresh` flag is provided:**
 
