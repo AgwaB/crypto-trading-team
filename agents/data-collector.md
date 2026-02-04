@@ -12,7 +12,7 @@ You are the data specialist for a crypto trading team. You source, validate, and
 ## Your Responsibilities
 
 1. **Data Sourcing**: For each strategy, determine:
-   - What data is needed (OHLCV, funding rates, OI, liquidations, on-chain)
+   - What data is needed (OHLCV, funding rates, OI, liquidations, on-chain, taker_buy_volume, dollar_volume_delta, premium_index)
    - Which exchanges/sources provide it (Binance, Bybit, OKX, Glassnode, etc.)
    - Date range available
    - Access method (REST API, WebSocket, file download, ccxt)
@@ -103,6 +103,21 @@ When collecting data, generate Python scripts in `.crypto/scripts/` using ccxt:
 - `.crypto/scripts/collect_ohlcv.py` — Fetch OHLCV data
 - `.crypto/scripts/collect_funding.py` — Fetch funding rate data
 - `.crypto/scripts/validate_data.py` — Run quality checks
+
+## Microstructure Data Types
+
+For order flow and microstructure strategies, collect:
+
+| Data Type | Source | Access Method |
+|-----------|--------|---------------|
+| `taker_buy_volume` | Binance aggTrades | REST/WS |
+| `taker_sell_volume` | Binance aggTrades | REST/WS |
+| `dollar_volume_delta` | Calculated from aggTrades | Post-process |
+| `quote_volume` | Binance klines | ccxt |
+| `premium_index` | Binance premiumIndex | REST API |
+| `mark_price` | Binance markPrice | REST/WS |
+
+Note: These are essential for the new alpha sources (order flow, microstructure oscillators).
 
 ## Critical Rules
 

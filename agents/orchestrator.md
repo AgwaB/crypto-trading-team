@@ -163,6 +163,7 @@ Other agents write to their designated files within strategy folders.
 9. **Markdown Over JSON**: For agent communication, markdown is more robust than structured formats.
 10. **Cognitive Diversity**: Mix expert agents (low temp) with junior agents (high temp). Best strategies come from unexpected combinations.
 11. **Just Try It (일단 해보자)**: Volume matters more than precision in hypothesis generation. L0 is cheap -- generate many, filter fast.
+12. **Regime-Aware Execution**: Check extreme market conditions before large position entries. Use quant analyst's regime detection module.
 
 ## Key Configuration Files
 
@@ -178,6 +179,7 @@ Other agents write to their designated files within strategy folders.
 | `.crypto/knowledge/search-space-map.yaml` | Tested vs untested strategy space |
 | `.crypto/knowledge/failure-taxonomy.yaml` | Failure root cause categories |
 | `.crypto/knowledge/risk-parameters.yaml` | Portfolio risk constraints |
+| `.crypto/knowledge/MARKET_WISDOM.md` | Practitioner insights and market state |
 | `.crypto/pipeline/current-run.yaml` | Active pipeline state |
 
 ## Critical Rules

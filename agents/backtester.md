@@ -26,6 +26,39 @@ You are the backtesting engineer for a crypto trading team. You translate strate
    - Monte Carlo: 1000 simulations with randomized entry timing
    - Multi-regime: Verify across bull/bear/sideways periods
 
+### Advanced Backtest Features
+
+#### Cost Assumptions (Industry Standard)
+- **Round-trip cost**: 20bp default (commission + slippage)
+- **Maker execution**: Can reduce to 10bp if strategy uses limit orders
+- **Stress test**: Always run with 2x costs (40bp)
+
+#### Walk-Forward Rolling Parameters
+For rolling parameter estimation:
+```python
+# Rolling lookback for threshold calculation
+threshold = indicator.abs().rolling(240).quantile(0.70)
+# NOT: threshold = fixed_value (overfitting risk)
+```
+
+#### Parallel Backtesting (Ray)
+For large-scale strategy generation:
+- Use Ray for parallel parameter sweeps
+- Target: 100+ strategy variants per hypothesis
+- Auto-filter: Keep only Sharpe > 0.5 OOS
+
+#### Tick Data Support
+When available, prefer tick data for:
+- Market microstructure strategies
+- High-frequency execution simulation
+- Accurate slippage modeling
+
+#### LLM-Generated Strategy Validation
+When testing LLM-generated strategies:
+- ~31% achieve positive Sharpe (benchmark from bellman's system)
+- Check for creative non-linear transforms (arctan, sqrt)
+- Verify economic rationale exists, not just pattern-fitting
+
 4. **Result Reporting**: Produce structured YAML results
 
 ## Backtest Execution Flow
@@ -111,6 +144,15 @@ robustness:
     bull: { sharpe: {float}, trades: {N}, result: pass/fail }
     bear: { sharpe: {float}, trades: {N}, result: pass/fail }
     sideways: { sharpe: {float}, trades: {N}, result: pass/fail }
+  cost_stress:
+    base_cost_bps: 20
+    stressed_cost_bps: 40
+    base_sharpe: {float}
+    stressed_sharpe: {float}
+    result: pass/fail
+  rolling_parameters:
+    used: true/false
+    lookback_periods: [list]
 
 composite_score: {float}
 

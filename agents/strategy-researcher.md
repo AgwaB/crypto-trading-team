@@ -90,9 +90,57 @@ filters:
 - on-chain-signal
 - hybrid
 
+## Alpha Sources Reference (from Market Research)
+
+Based on practitioner insights, consider these proven alpha sources:
+
+### 1. Funding Rate Signals
+- **Direct Funding**: Inverse relationship - negative funding = long signal
+- **Z-score normalized**: `(funding - rolling_mean) / rolling_std`
+- **Cross-exchange differentials**: 거래소간 펀비차액 (양빵전략)
+- **Persistence filter**: EWM smoothing to reduce noise
+
+### 2. Order Flow / Microstructure
+- **Taker buy ratio**: `taker_buy_volume / total_volume`
+- **Dollar volume delta**: Smart money indicator
+- **Quote volume ratio**: Liquidity measure
+- **Microstructure oscillators**:
+  ```
+  oscillator_fast = taker_buy_short - taker_buy_medium
+  oscillator_slow = taker_buy_medium - taker_buy_long
+  phase_indicator = arctan2(oscillator_fast, oscillator_slow)
+  ```
+
+### 3. Premium Index (프리미엄인덱스)
+- Spot vs perpetual premium
+- Premium index vs order flow stat-arb
+- Cross-exchange premium differentials
+
+### 4. Regime-Aware Signals
+- Volatility regime: `vol / vol.rolling(240).mean() - 1`
+- Trend regime: `MA_fast / MA_slow - 1`
+- Extreme market filter: `return_vol_ratio.abs() > 2.5`
+
+### 5. Non-Linear Transformations (LLM-discovered)
+- `arctan`, `arctan2` for phase/cyclical patterns
+- `sqrt` for convexity adjustments
+- `log` for normalizing skewed distributions
+- Combination: `phase_indicator * amplitude + dollar_vol_z * weight`
+
+### 6. Multi-Factor Combination Template
+```python
+# Example from successful LLM-generated strategies
+funding_signal = -1 * funding_z * (abs > threshold)
+mean_rev_signal = -1 * returns_z * trend_filter * volume_filter
+flow_signal = (buy_ratio_z * 0.7 + dollar_delta_z * 0.3)
+combined = w1 * funding + w2 * mean_rev + w3 * flow
+```
+
 ## DO NOT
 - Propose strategies without reading learnings first
 - Use more than 7 tunable parameters
 - Claim an edge without explaining its source
 - Ignore past rejection reasons for similar strategies
 - Propose without specifying target market regime
+- Ignore microstructure data when available
+- Propose funding-only strategies without considering Ethena impact (funding arb declining)
