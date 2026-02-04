@@ -1,7 +1,7 @@
 {
   "name": "crypto",
-  "version": "0.7.3",
-  "description": "World-class crypto trading team: 17 specialized LLM agents with tiered validation (L0-L3), 24/7 never-end mode (External Scout + Strategy Mutator), active learning injection, and continuous strategy discovery.",
+  "version": "0.8.0",
+  "description": "World-class crypto trading team: 17 specialized LLM agents with organized folder structure, tiered validation (L0-L3), 24/7 never-end mode (External Scout + Strategy Mutator), active learning injection, and continuous strategy discovery.",
   "author": {
     "name": "toby"
   },

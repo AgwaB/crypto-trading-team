@@ -17,17 +17,51 @@ Set up the current directory as a crypto trading team workspace with all require
 2. **Create directory structure**:
    ```
    .crypto/
+   .crypto/analysis/
+   .crypto/config/
+   .crypto/config/agents/
+   .crypto/data/
+   .crypto/data/spot/
+   .crypto/data/spot/daily/
+   .crypto/data/spot/hourly/
+   .crypto/data/spot/minute/
+   .crypto/data/derivatives/
+   .crypto/data/derivatives/ohlcv/
+   .crypto/data/derivatives/oi/
+   .crypto/data/funding/
+   .crypto/data/options/
+   .crypto/data/onchain/
+   .crypto/data/altcoins/
+   .crypto/data/sectors/
+   .crypto/data/external/
+   .crypto/iterations/
    .crypto/knowledge/
    .crypto/knowledge/strategies/
    .crypto/knowledge/decisions/
    .crypto/knowledge/data-catalog/
    .crypto/knowledge/data-catalog/datasets/
    .crypto/knowledge/weekly-insights/
+   .crypto/knowledge/external-signals/
+   .crypto/knowledge/meeting-logs/
+   .crypto/knowledge/meetings/
+   .crypto/learnings/
+   .crypto/logs/
+   .crypto/logs/paper_trading/
+   .crypto/paper_trading/
+   .crypto/paper_trading/state/
+   .crypto/paper_trading/logs/
    .crypto/pipeline/
-   .crypto/config/
-   .crypto/config/agents/
+   .crypto/plans/
+   .crypto/reports/
+   .crypto/reports/backtests/
+   .crypto/reports/assessments/
+   .crypto/reports/collections/
+   .crypto/results/
    .crypto/scripts/
-   .crypto/data/
+   .crypto/scripts/collectors/
+   archives/
+   archives/mutations/
+   archives/strategies/
    ```
 
 3. **Create template files** (use Write tool for each):
@@ -574,6 +608,154 @@ stats:
   compliance_rate: 1.0
 ```
 
+### .crypto/FOLDER_RULES.md
+```markdown
+# Folder Organization Rules
+
+> Last updated: {current_date}
+
+## Root Directory Structure
+
+### archives/
+Retired strategies and mutations that are no longer active.
+
+- `archives/mutations/` - Historical strategy mutations (MUT-XXX)
+- `archives/strategies/` - Archived strategies (STR-XXX)
+
+### docs/
+Project documentation, guides, and reference materials.
+
+### implementation/
+Active strategy implementation code.
+
+### scripts/
+Utility scripts for data collection, analysis, and automation.
+
+## .crypto/ Internal Structure
+
+### .crypto/analysis/
+Ad-hoc analysis notebooks and reports. Exploratory work that may or may not lead to strategies.
+
+### .crypto/config/
+Configuration files for the trading system.
+
+- `config/agents/` - Agent-specific configuration files
+
+### .crypto/data/
+All market data storage, organized by type and timeframe.
+
+#### Spot Market Data
+- `data/spot/daily/` - Daily OHLCV for spot markets
+- `data/spot/hourly/` - Hourly OHLCV for spot markets
+- `data/spot/minute/` - Minute-level OHLCV for spot markets
+
+#### Derivatives Data
+- `data/derivatives/ohlcv/` - Derivatives OHLCV data
+- `data/derivatives/oi/` - Open interest data
+- `data/funding/` - Funding rate data
+
+#### Alternative Data
+- `data/options/` - Options and IV data
+- `data/onchain/` - On-chain metrics
+- `data/altcoins/` - Altcoin-specific data
+- `data/sectors/` - Sector/category aggregated data
+- `data/external/` - External data sources (sentiment, macro, etc.)
+
+### .crypto/iterations/
+Strategy iteration history. Each strategy revision gets logged here.
+
+### .crypto/knowledge/
+The team's institutional memory and decision logs.
+
+- `knowledge/strategies/` - Strategy definitions and metadata (STR-XXX.yaml)
+- `knowledge/decisions/` - Decision records and rationales
+- `knowledge/data-catalog/` - Data availability and quality metadata
+  - `data-catalog/datasets/` - Individual dataset documentation
+- `knowledge/weekly-insights/` - Weekly market and system insights
+- `knowledge/external-signals/` - Third-party signals and research
+- `knowledge/meeting-logs/` - Strategy meeting transcripts
+- `knowledge/meetings/` - Meeting outputs and action items
+
+### .crypto/learnings/
+Cross-cutting learnings from failures and successes. Read before proposing strategies.
+
+### .crypto/logs/
+System logs and audit trails.
+
+- `logs/paper_trading/` - Paper trading execution logs
+
+### .crypto/paper_trading/
+Paper trading state and results.
+
+- `paper_trading/state/` - Current positions and state
+- `paper_trading/logs/` - Trade execution logs
+
+### .crypto/pipeline/
+Current pipeline state and queue.
+
+### .crypto/plans/
+Strategic plans and roadmaps.
+
+### .crypto/reports/
+Generated reports and assessments.
+
+- `reports/backtests/` - Backtest result reports
+- `reports/assessments/` - Strategy assessment reports
+- `reports/collections/` - Report collections and summaries
+
+### .crypto/results/
+Raw backtest results and performance data.
+
+### .crypto/scripts/
+Internal scripts for automation.
+
+- `scripts/collectors/` - Data collection scripts
+
+## Naming Conventions
+
+### Strategy IDs
+- Format: `STR-XXX` where XXX is a zero-padded sequential number
+- Example: `STR-001`, `STR-023`, `STR-142`
+- Used in: `.crypto/knowledge/strategies/STR-XXX.yaml`
+
+### Mutation IDs
+- Format: `MUT-XXX` where XXX is a zero-padded sequential number
+- Example: `MUT-001`, `MUT-015`
+- Used in: Strategy mutation tracking
+
+### Scout IDs
+- Format: `SCOUT-XXX` where XXX is a zero-padded sequential number
+- Example: `SCOUT-001`, `SCOUT-042`
+- Used in: External signal tracking
+
+### Data File Naming
+Data files use descriptive names with timeframe suffixes:
+
+- `{symbol}_{timeframe}.parquet` - Standard format
+- Examples:
+  - `BTCUSDT_1d.parquet` - Daily data
+  - `BTCUSDT_4h.parquet` - 4-hour data
+  - `BTCUSDT_1h.parquet` - Hourly data
+  - `BTCUSDT_15m.parquet` - 15-minute data
+  - `funding_rate_BTCUSDT_8h.parquet` - Funding rate data
+
+Timeframe codes:
+- `1m`, `5m`, `15m`, `30m` - Minutes
+- `1h`, `4h`, `8h`, `12h` - Hours
+- `1d`, `1w`, `1M` - Days, weeks, months
+
+## Rules
+
+1. **Never mix data types in folders**: Spot data stays in spot/, derivatives in derivatives/
+2. **Use parquet format**: All data files should be .parquet for efficiency
+3. **Archive retired strategies**: Move to archives/ when disabled/deprecated
+4. **Document in knowledge/**: Every strategy gets a YAML file in knowledge/strategies/
+5. **Timeframe in filename**: Always include timeframe suffix in data filenames
+6. **Zero-padded IDs**: STR-001 not STR-1, for proper sorting
+7. **Scripts vs analysis**: Scripts are reusable tools, analysis is exploratory
+8. **Logs are append-only**: Never delete logs, only archive old ones
+```
+
 4. **Confirmation**: After creating all files, output:
    ```
    Trading team workspace initialized.
@@ -584,7 +766,7 @@ stats:
    - .crypto/config/ (thresholds, portfolio-thresholds, tiered-validation, self-diagnostics, meeting protocol)
    - .crypto/pipeline/current-run.yaml (pipeline state)
 
-   Team: 12 agents (Orchestrator, Insight, Feedback, Researcher, Maverick, DataCurious, Quant, Data, Backtester, Critic, Risk, ML Engineer)
+   Team: 17 agents (Orchestrator, Insight, Feedback, Researcher, Maverick, DataCurious, Quant, Data, Backtester, Critic, Risk, ML Engineer, External Scout, Strategy Mutator, Portfolio Manager, Paper Trader, Monitor)
    Pipeline: Insight -> Feedback -> L0 -> L1 -> L2 -> Critic -> L3 -> Risk -> [HUMAN]
 
    Next: /crypto:pipeline to start developing strategies.
