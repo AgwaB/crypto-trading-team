@@ -1,6 +1,6 @@
 ---
 description: "24/7 autonomous strategy discovery with External Scout + Strategy Mutator. Never stops until you say so."
-argument-hint: "[--max-iterations N] [FOCUS_AREA]"
+argument-hint: "[--max-iterations N] [--fresh] [FOCUS_AREA]"
 ---
 
 # Crypto Never-End — 24/7 Autonomous Strategy Discovery
@@ -11,7 +11,39 @@ You are now in a **24/7 autonomous strategy discovery loop**. This loop NEVER st
 
 ## Session Initialization
 
-First, create the state file to track this session:
+### Step 0: Check for Existing Session
+
+First, check if `.crypto/never-end-state.md` exists.
+
+**If the file exists AND `--fresh` flag is NOT provided:**
+
+1. Read the existing state file and parse the frontmatter:
+   - iteration, max_iterations, strategies_found, strategies_rejected
+   - scout_runs, mutator_runs, started
+
+2. Display the previous session info:
+   ```
+   ## Previous Never-End Session Found
+
+   - Started: {started}
+   - Iterations completed: {iteration}
+   - Strategies: {strategies_found} validated / {strategies_rejected} rejected
+   - Scout runs: {scout_runs} | Mutator runs: {mutator_runs}
+   ```
+
+3. **ASK the user using AskUserQuestion tool:**
+   - Question: "Resume previous session or start fresh?"
+   - Options:
+     - **Resume**: Continue from iteration {iteration + 1} with existing counters
+     - **Start Fresh**: Reset all counters and start from iteration 1
+
+4. Based on user choice:
+   - **Resume**: Keep the existing state file, increment iteration by 1, proceed to Critical Rules
+   - **Start Fresh**: Create new state file (see below)
+
+**If the file does NOT exist OR `--fresh` flag is provided:**
+
+Create the state file to track this session:
 
 ```
 Write to .crypto/never-end-state.md:
@@ -28,8 +60,11 @@ started: [current timestamp]
 [Full prompt content will be preserved here by the stop hook]
 ```
 
+### Step 1: Parse Arguments
+
 Parse arguments from: $ARGUMENTS
 - If `--max-iterations N` is present, set max_iterations to N (0 = unlimited)
+- If `--fresh` is present, skip the resume prompt and start fresh
 - If FOCUS_AREA is provided, focus all agents on that area
 
 ## Critical Rules
