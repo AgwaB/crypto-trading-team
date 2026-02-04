@@ -28,6 +28,29 @@ if ! grep -q 'NEVER-END-SESSION-ACTIVE' "$TRANSCRIPT_PATH" 2>/dev/null; then
   exit 0
 fi
 
+# Check for stop signal file (created by /crypto:stop command)
+STOP_SIGNAL_FILE=".crypto/never-end-stop-signal"
+if [[ -f "$STOP_SIGNAL_FILE" ]]; then
+  echo "Never-End: Stop signal detected — terminating gracefully." >&2
+
+  # Parse counters for final report
+  FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$STATE_FILE") || true
+  STRATEGIES_FOUND=$(echo "$FRONTMATTER" | grep '^strategies_found:' | sed 's/strategies_found: *//' || echo "0")
+  STRATEGIES_REJECTED=$(echo "$FRONTMATTER" | grep '^strategies_rejected:' | sed 's/strategies_rejected: *//' || echo "0")
+  SCOUT_RUNS=$(echo "$FRONTMATTER" | grep '^scout_runs:' | sed 's/scout_runs: *//' || echo "0")
+  MUTATOR_RUNS=$(echo "$FRONTMATTER" | grep '^mutator_runs:' | sed 's/mutator_runs: *//' || echo "0")
+  TOTAL=$((STRATEGIES_FOUND + STRATEGIES_REJECTED))
+
+  echo "" >&2
+  echo "=== Never-End Session Stopped ===" >&2
+  echo "Strategies: $STRATEGIES_FOUND validated / $STRATEGIES_REJECTED rejected / $TOTAL total" >&2
+  echo "Expansion: $SCOUT_RUNS scout runs / $MUTATOR_RUNS mutator runs" >&2
+
+  # Clean up signal file but preserve state (can resume later)
+  rm -f "$STOP_SIGNAL_FILE"
+  exit 0
+fi
+
 # Check if Claude voluntarily ended the loop
 LAST_LINE=$(grep '"role":"assistant"' "$TRANSCRIPT_PATH" | tail -1 || true)
 if [[ -n "$LAST_LINE" ]]; then
