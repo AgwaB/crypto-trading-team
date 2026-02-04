@@ -171,6 +171,26 @@ Scout runs: {count} | Mutator runs: {count}
 
 ## Manual Stop
 
-To stop this loop, the user must explicitly type "stop" or "/crypto:stop" or press Ctrl+C. Do NOT stop on your own — keep running indefinitely.
+To stop this loop, the user must explicitly type "stop" or `/crypto:stop` or press Ctrl+C. Do NOT stop on your own — keep running indefinitely.
+
+### Stop Signal Detection
+
+At the START of each iteration, check for stop signal:
+
+```
+if exists('.crypto/never-end-stop-signal'):
+    1. Read signal file for reason
+    2. Read .crypto/never-end-state.md for session stats
+    3. Output final summary:
+       - Session duration
+       - Iterations completed
+       - Strategies validated/rejected
+       - Scout/Mutator run counts
+    4. Delete .crypto/never-end-stop-signal
+    5. Output: "Never-end session stopped gracefully."
+    6. EXIT (do not continue loop)
+```
+
+The `/crypto:stop` command creates this signal file.
 
 When YOU determine there are truly no more viable strategies (all data exhausted, all approaches tested, search space fully covered), output `<never-end-complete>` and the loop will cleanly terminate with a summary. But this should be VERY rare — External Scout and Mutator should always find new angles.
