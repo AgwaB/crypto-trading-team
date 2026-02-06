@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "crypto",
-      "description": "Self-managing crypto trading company: 20 LLM agents with team hierarchy, automated retrospectives, performance scoring, and 24/7 autonomous operation.",
-      "version": "0.9.0",
+      "description": "Self-managing crypto trading company: 20 LLM agents with team hierarchy, automated retrospectives, performance scoring, Telegram notifications, and 24/7 autonomous operation.",
+      "version": "0.9.1",
       "author": {
         "name": "toby"
       },

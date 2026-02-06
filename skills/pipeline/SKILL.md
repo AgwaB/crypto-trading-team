@@ -102,7 +102,16 @@ This skill runs the full autonomous strategy development pipeline from ideation 
     - Log session to `.crypto/knowledge/session-log.yaml`
     - Extract learnings via Feedback Agent (whether pass or fail)
 
-15. **Present Evidence Chain** to user:
+15. **Telegram Notification** (if configured):
+    - Check if Telegram MCP is available (test for `send_message` tool)
+    - If available, send pipeline result notification:
+      - Strategy name and ID
+      - Result: VALIDATED or REJECTED (with tier and reason)
+      - Key metrics (Sharpe, PF, Win Rate, Max Drawdown)
+    - If not available, skip silently
+    - **IMPORTANT**: Never let notification failure block the pipeline
+
+16. **Present Evidence Chain** to user:
     - Strategy hypothesis summary
     - Tiered validation results (L0 -> L1 -> L2 -> L3)
     - Critic verdict

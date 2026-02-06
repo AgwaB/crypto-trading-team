@@ -229,6 +229,32 @@ Promote when:
 - Avg Score: 0.68
 ```
 
+## Notifications
+
+All HR actions send Telegram notifications (if configured):
+
+### On Hire
+- Agent name, role, team assignment
+- Model tier and probation period
+- Reason for hiring
+
+### On Fire
+- Agent name, last team
+- Termination reason with performance history
+- Whether replacement is planned
+
+### On Promote
+- Agent name, new role
+- Previous performance scores
+- New team and responsibilities
+
+### On Review
+- Summary statistics (active, probation, terminated counts)
+- Top/bottom performers
+- Pending actions
+
+**Implementation**: After each HR action, check if Telegram MCP is available. If yes, format and send notification. If no, skip silently.
+
 ## Integration
 
 ### With Retrospectives

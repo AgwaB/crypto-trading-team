@@ -96,6 +96,16 @@ After 5 meetings with 0 L0 survivors:
 - Change theme constraint
 - Request new data source investigation
 
+## Telegram Notification (if configured)
+
+After meeting completes, send summary:
+- Total ideas proposed and by which agents
+- Ideas that passed L0 screening
+- Ideas rejected (with reasons: duplicate, infeasible, etc.)
+- Top 3 most promising ideas
+
+Check if Telegram MCP is available first. Skip silently if not configured.
+
 ## Output
 
 After each meeting, present:
