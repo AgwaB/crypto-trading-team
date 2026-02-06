@@ -84,6 +84,13 @@ Parse arguments from: $ARGUMENTS
 
 4. **ALWAYS Update State**: After each iteration, update registry, BOOTSTRAP.md, and learnings.md
 
+5. **CONTEXT MANAGEMENT (CRITICAL)**: This loop runs for hundreds of iterations. You MUST prevent context overflow:
+   - At the END of every iteration, after recording results, type `/compact` to compress the conversation
+   - Keep agent result summaries to 2-3 lines max — never paste full agent outputs into context
+   - Only retain the iteration summary, not intermediate reasoning
+   - If you notice the conversation growing large, compact IMMEDIATELY before starting the next iteration
+   - **This is mandatory — failing to compact will crash the session**
+
 ## Pipeline Per Iteration
 
 ### Phase 0: Pre-Pipeline (Ideation + Screening)

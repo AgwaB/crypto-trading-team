@@ -9,10 +9,68 @@ set -uo pipefail
 HOOK_INPUT=$(cat)
 
 STATE_FILE=".crypto/never-end-state.md"
+BLOCK_COUNTER_FILE=".crypto/.never-end-block-counter"
 
 # No state file → not a never-end session
 if [[ ! -f "$STATE_FILE" ]]; then
+  rm -f "$BLOCK_COUNTER_FILE"
   exit 0
+fi
+
+# --- Rapid-fire detection ---
+# If the hook has blocked multiple times within a short window, Claude likely
+# can't continue (context limit reached). Allow graceful exit with state preserved.
+MAX_RAPID_BLOCKS=2
+RAPID_WINDOW_SECS=60
+NOW=$(date +%s)
+
+if [[ -f "$BLOCK_COUNTER_FILE" ]]; then
+  LAST_BLOCK_TS=$(head -1 "$BLOCK_COUNTER_FILE" 2>/dev/null || echo "0")
+  BLOCK_COUNT=$(tail -1 "$BLOCK_COUNTER_FILE" 2>/dev/null || echo "0")
+  ELAPSED=$((NOW - LAST_BLOCK_TS))
+
+  if [[ $ELAPSED -lt $RAPID_WINDOW_SECS ]]; then
+    BLOCK_COUNT=$((BLOCK_COUNT + 1))
+    if [[ $BLOCK_COUNT -ge $MAX_RAPID_BLOCKS ]]; then
+      # Too many blocks in quick succession — context limit likely reached
+      # Auto-restart: spawn a fresh session to continue the loop
+      echo "Never-End: Context limit detected — auto-restarting fresh session..." >&2
+      rm -f "$BLOCK_COUNTER_FILE"
+
+      WORK_DIR="$(pwd)"
+      RESTART_PROMPT="NEVER-END-SESSION-ACTIVE. Context limit was reached in previous session. Read .crypto/never-end-state.md and continue the 24/7 strategy discovery loop from where it left off. Run /compact proactively every iteration."
+
+      # Try auto-restart methods in order of preference
+      if [[ -n "${TMUX:-}" ]]; then
+        # Running in tmux — send command to current pane after session exits
+        PANE_ID=$(tmux display-message -p '#{pane_id}')
+        tmux send-keys -t "$PANE_ID" "cd '$WORK_DIR' && claude -p '$RESTART_PROMPT'" Enter 2>/dev/null && {
+          echo "Never-End: Auto-restart queued via tmux." >&2
+          exit 0
+        }
+      fi
+
+      # Fallback: write restart script
+      RESTART_SCRIPT="$WORK_DIR/.crypto/never-end-restart.sh"
+      cat > "$RESTART_SCRIPT" << RESTART_EOF
+#!/bin/bash
+cd "$WORK_DIR"
+exec claude -p "$RESTART_PROMPT"
+RESTART_EOF
+      chmod +x "$RESTART_SCRIPT"
+      echo "Never-End: Session state preserved. Auto-restart:" >&2
+      echo "  bash $RESTART_SCRIPT" >&2
+      exit 0
+    fi
+    # Update counter
+    printf '%s\n%s\n' "$LAST_BLOCK_TS" "$BLOCK_COUNT" > "$BLOCK_COUNTER_FILE"
+  else
+    # Window expired, reset counter
+    printf '%s\n%s\n' "$NOW" "1" > "$BLOCK_COUNTER_FILE"
+  fi
+else
+  # First block — start tracking
+  printf '%s\n%s\n' "$NOW" "1" > "$BLOCK_COUNTER_FILE"
 fi
 
 # Check if THIS session is actually a never-end session
@@ -170,6 +228,8 @@ TOTAL=$((STRATEGIES_FOUND + STRATEGIES_REJECTED))
 SYSTEM_MSG="Never-End iteration $NEXT_ITERATION | Found: $STRATEGIES_FOUND | Rejected: $STRATEGIES_REJECTED | Total: $TOTAL | Scout: $SCOUT_RUNS | Mutator: $MUTATOR_RUNS$(if [[ $MAX_ITERATIONS -gt 0 ]]; then echo " | Max: $MAX_ITERATIONS"; fi)"
 
 # Output ONLY the JSON to stdout
+# Note: block counter is NOT reset here — it resets via the time window.
+# If Claude successfully continues, the next stop will be >60s later and the window resets.
 jq -n \
   --arg prompt "$PROMPT_TEXT" \
   --arg msg "$SYSTEM_MSG" \
