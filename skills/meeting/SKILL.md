@@ -39,6 +39,26 @@ Spawn 3 agents in parallel:
 
 Collect all proposals.
 
+### Architecture Diversity Check (MANDATORY)
+
+Before collecting proposals, check `.crypto/never-end-state.md` for `architecture_distribution`.
+
+1. **Identify underexplored families**: Any family with < 5% of total iterations
+2. **Force at least 1 proposal per underexplored family**:
+   - Add to Senior Strategist prompt: "You MUST include at least 1 proposal from: {underexplored_families}. Do NOT propose another TSMOM variant unless you also include non-TSMOM ideas."
+   - Add to Junior Maverick prompt: "Propose at least 1 idea that is NOT a momentum strategy. Think: mean-reversion, carry, arbitrage, sentiment, on-chain, options."
+   - Add to Junior DataCurious prompt: "What non-price data sources could generate trading signals? Think: on-chain metrics, social sentiment, options flow, exchange withdrawals."
+
+3. **If ALL proposals are TSMOM variants**: REJECT the meeting output and re-run with forced diversity constraints. This is a hard rule.
+
+### Data-Aware Ideation
+
+When proposing strategies that need external data:
+1. **Tag each proposal** with `data_available: true/false`
+2. **If data not available**, specify exactly what's needed and where to get it
+3. **Do NOT auto-reject** proposals just because data isn't available — flag them for data acquisition
+4. Meeting output should separately list "actionable now" vs "needs data acquisition" proposals
+
 ## Phase 2: COLLECT
 
 Merge all proposals into a single list:
@@ -56,7 +76,7 @@ Auto-reject any DUPLICATE proposals.
 ## Phase 4: SELECT
 
 Rank remaining proposals by: novelty_score * feasibility_estimate
-Select top 3 for L0 validation.
+Select top 3 for L0 validation. At least 1 must be from a different architecture family than the most-tested family (if any non-TSMOM proposals exist).
 
 For each selected proposal:
 - Create `.crypto/knowledge/strategies/STR-{NNN}/hypothesis.md`

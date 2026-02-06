@@ -1,6 +1,6 @@
 {
   "name": "crypto",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "Self-managing crypto trading company: 20 LLM agents (3 team leads + 17 specialists) with team hierarchy, automated retrospectives, performance scoring, dynamic hiring/firing, Telegram notifications, and 24/7 autonomous operation.",
   "author": {
     "name": "toby"

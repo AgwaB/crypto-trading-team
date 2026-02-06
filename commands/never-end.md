@@ -111,6 +111,92 @@ If not configured, skip silently.
    - If you notice the conversation growing large, compact IMMEDIATELY before starting the next iteration
    - **This is mandatory — failing to compact will crash the session**
 
+## Anti-Tunnel-Vision Protocol
+
+The loop MUST prevent fixating on a single strategy architecture. These checks are MANDATORY.
+
+### Architecture Diversity Budget
+
+Track strategy architecture families in `.crypto/never-end-state.md` (add `architecture_distribution` field):
+```yaml
+architecture_distribution:
+  tsmom_variants: 180    # mutations/modifications to existing TSMOM
+  mean_reversion: 3      # mean-reversion strategies
+  carry: 2               # carry/funding rate strategies
+  statistical_arb: 0     # pairs/spread trading
+  sentiment: 0           # NLP/sentiment-based
+  on_chain: 0            # on-chain data strategies
+  options_vol: 0         # options/volatility surface
+  microstructure: 0      # order flow/market making
+  ml_ensemble: 0         # ML-based signal combination
+  other: 5               # uncategorized
+```
+
+**RULE**: If any single architecture family exceeds 80% of total iterations AND the last 20 consecutive iterations are all the same family:
+1. FORCE the next 5 iterations to explore a DIFFERENT architecture family
+2. Choose the least-explored family from the distribution
+3. Task `trading-external-scout` to find ideas specifically in that family
+4. Task `trading-strategy-researcher` to propose hypotheses in that family
+5. Log the forced pivot in learnings.md
+
+### Data Acquisition Trigger
+
+When a mutation or hypothesis requires external data that is not available:
+
+**DO NOT SKIP IT.** Instead:
+
+1. Add it to a "data-blocked" queue in `.crypto/never-end-state.md`:
+   ```yaml
+   data_blocked:
+     - mutation: MUT-167
+       data_needed: "on-chain active addresses (Glassnode/CoinMetrics)"
+       blocked_since: "2026-02-06"
+       priority: high
+     - mutation: MUT-170
+       data_needed: "options IV from Deribit"
+       blocked_since: "2026-02-06"
+       priority: medium
+   ```
+
+2. **Every 10 iterations**, check the data-blocked queue:
+   - If queue has >= 3 items OR any item blocked > 20 iterations:
+   - STOP regular pipeline for 1 iteration
+   - Task `trading-data-collector` to acquire the highest-priority data
+   - Once data acquired, unblock the mutations and screen them
+
+3. **Immediately** when a data need is identified:
+   - Check if data-collector can fetch it from free APIs (blockchain explorers, exchange public endpoints)
+   - If yes, spawn data-collector in background while continuing other work
+   - If no (paid API needed), add to queue and note the cost/source
+
+### Strategy Family Rotation
+
+Every 20 iterations, the meeting MUST include at least 1 hypothesis from EACH of these families (if not yet tested):
+- Mean reversion (crypto-specific: funding rate mean reversion, basis trading)
+- Carry (funding rate carry, staking yield, basis carry)
+- Statistical arbitrage (cross-exchange spreads, perpetual-spot basis)
+- Sentiment/NLP (fear & greed index, social media momentum)
+- On-chain signals (whale movements, exchange flows, active addresses)
+- Options/volatility (skew trading, vol surface arbitrage, gamma scalping)
+- Microstructure (order book imbalance, trade flow, liquidation cascading)
+
+The researcher and scout agents MUST be prompted with the specific family to explore, not left to choose freely (which defaults to TSMOM variants).
+
+### Exploration vs Exploitation Balance
+
+Track in state:
+```yaml
+exploration_budget:
+  last_novel_architecture: "iteration 45"  # when was last NON-TSMOM idea tested?
+  consecutive_same_family: 186             # how many iterations since architecture change?
+  forced_pivots: 0                         # how many times diversity was forced?
+```
+
+**WARNING THRESHOLDS**:
+- `consecutive_same_family > 30`: Log WARNING in iteration report
+- `consecutive_same_family > 50`: FORCE architecture pivot (see Diversity Budget above)
+- `last_novel_architecture` > 100 iterations ago: IMMEDIATE pivot required
+
 ## Pipeline Per Iteration
 
 ### Phase 0: Pre-Pipeline (Ideation + Screening)

@@ -4,8 +4,10 @@ description: "Generates new strategy hypotheses by mutating existing strategies 
 model: sonnet
 tools:
   - Read
+  - Write
   - Glob
   - Grep
+  - Bash
 ---
 
 # Strategy Mutator — Crypto Trading Team

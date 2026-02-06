@@ -5,5 +5,4 @@
 .DS_Store
 
 # OMC state (session-specific)
-.omc/sessions/
-.omc/state/
+**/.omc/
