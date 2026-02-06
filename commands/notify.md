@@ -11,20 +11,30 @@ Send a notification message to the configured Telegram chat.
 
 Telegram notifications are **optional**. To enable:
 
-1. Get API credentials from https://my.telegram.org/apps
-2. Copy `.env.example` to `.env` and fill in your credentials:
+1. Create a bot via [@BotFather](https://t.me/BotFather) on Telegram:
+   - Send `/newbot` to @BotFather
+   - Follow the prompts to create your bot
+   - Copy the bot token (looks like `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`)
+
+2. Get your chat ID:
+   - Message [@userinfobot](https://t.me/userinfobot) on Telegram
+   - It will reply with your user ID
+
+3. Configure credentials (choose one):
+
+   **Option A: Project-level** (recommended for per-project configs)
    ```bash
-   cp .env.example .env
-   # Edit .env with your values
+   # In your trading project root
+   cp .crypto/.env.example .crypto/.env
+   # Edit .crypto/.env with your bot token and chat ID
    ```
 
-   Or set environment variables directly:
+   **Option B: Plugin-level** (global default)
    ```bash
-   export TELEGRAM_API_ID="your_api_id"
-   export TELEGRAM_API_HASH="your_api_hash"
-   export TELEGRAM_PHONE="your_phone_number"
+   # Edit the plugin's .env file
+   vim ~/.claude/plugins/marketplaces/crypto-trading-team/.env
+   # Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID
    ```
-3. Restart Claude Code - the Telegram MCP server will auto-connect
 
 ## Usage
 
@@ -36,21 +46,16 @@ This command is called automatically by other skills, but you can also use it ma
 
 ## How It Works
 
-1. **Check if Telegram MCP is available**: Look for `send_message` tool
-2. **If available**: Send formatted message via MCP
-3. **If not available**: Skip silently (no error)
+1. **Run notification script**: Executes `.crypto/scripts/send_telegram.sh` with the message
+2. **Script reads credentials**: From `.crypto/.env` (project) → plugin `.env` (fallback) → environment variables
+3. **Send via Bot API**: Uses curl to POST to `https://api.telegram.org/bot{TOKEN}/sendMessage`
+4. **Silent skip if not configured**: If credentials are empty, the script exits silently without error
 
 ## Notification Protocol
 
-When sending notifications, always:
+When sending notifications from skills:
 
-1. Check if Telegram is configured:
-   ```
-   Try calling search_dialogs or send_message tool
-   If tool not available → skip notification, continue normally
-   ```
-
-2. Format message with context:
+1. Format message with context:
    ```
    📊 **Crypto Trading Team**
    ━━━━━━━━━━━━━━━━━━━━━━
@@ -61,10 +66,16 @@ When sending notifications, always:
    🕐 {timestamp}
    ```
 
-3. Send via MCP tool:
+2. Run the notification script:
+   ```bash
+   .crypto/scripts/send_telegram.sh "formatted_message"
    ```
-   Use send_message tool with the target chat
-   ```
+
+3. Script handles everything:
+   - Loads credentials from appropriate .env file
+   - Silently skips if not configured
+   - Sends via curl to Telegram Bot API
+   - Never blocks or errors on failure
 
 ## Event Types & Formats
 
@@ -173,5 +184,6 @@ Active Strategies:
 ## Integration Notes
 
 - Notifications are **fire-and-forget**: failure to send does NOT block pipeline
-- All skills check `TELEGRAM_API_ID` env var existence before attempting
-- If env var is not set, notification step is silently skipped
+- The script checks for `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` in .env files
+- If credentials are not set, notification step is silently skipped
+- No MCP server required - uses standard Telegram Bot API via curl

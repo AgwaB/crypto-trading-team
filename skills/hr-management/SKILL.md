@@ -253,7 +253,7 @@ All HR actions send Telegram notifications (if configured):
 - Top/bottom performers
 - Pending actions
 
-**Implementation**: After each HR action, check if Telegram MCP is available. If yes, format and send notification. If no, skip silently.
+**Implementation**: After each HR action, run `.crypto/scripts/send_telegram.sh "formatted_message"`. Script silently skips if .env not configured.
 
 ## Integration
 

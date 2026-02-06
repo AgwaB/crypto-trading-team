@@ -66,6 +66,63 @@ Set up the current directory as a crypto trading team workspace with all require
 
 3. **Create template files** (use Write tool for each):
 
+### .crypto/.env.example
+```bash
+# Crypto Trading Team - Project Environment
+# Copy to .env and fill in your values
+
+# Telegram Bot Notification (optional - leave empty to disable)
+# Create a bot via @BotFather on Telegram
+TELEGRAM_BOT_TOKEN=
+# Your chat ID - message @userinfobot on Telegram to find it
+TELEGRAM_CHAT_ID=
+```
+
+### .crypto/scripts/send_telegram.sh
+```bash
+#!/bin/bash
+# Send Telegram notification via Bot API
+# Usage: send_telegram.sh "message text"
+#
+# Reads credentials from (in order):
+#   1. .crypto/.env in project root
+#   2. Plugin .env at ~/.claude/plugins/marketplaces/crypto-trading-team/.env
+#   3. Environment variables
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+CRYPTO_ENV="$PROJECT_ROOT/.crypto/.env"
+PLUGIN_ENV="$HOME/.claude/plugins/marketplaces/crypto-trading-team/.env"
+
+# Load .env (project first, plugin fallback)
+if [ -f "$CRYPTO_ENV" ]; then
+  set -a; source "$CRYPTO_ENV"; set +a
+elif [ -f "$PLUGIN_ENV" ]; then
+  set -a; source "$PLUGIN_ENV"; set +a
+fi
+
+BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+CHAT_ID="${TELEGRAM_CHAT_ID:-}"
+
+if [ -z "$BOT_TOKEN" ] || [ -z "$CHAT_ID" ]; then
+  # Silent skip if not configured
+  exit 0
+fi
+
+MESSAGE="$1"
+if [ -z "$MESSAGE" ]; then
+  echo "Usage: $0 \"message\"" >&2
+  exit 1
+fi
+
+curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+  -d chat_id="$CHAT_ID" \
+  -d parse_mode="Markdown" \
+  -d text="$MESSAGE" > /dev/null 2>&1
+
+exit 0
+```
+
 ### .crypto/BOOTSTRAP.md
 ```markdown
 # Crypto Trading Team - Bootstrap Context

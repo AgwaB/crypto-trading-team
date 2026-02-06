@@ -5,16 +5,5 @@
   "author": {
     "name": "toby"
   },
-  "license": "MIT",
-  "mcpServers": {
-    "telegram": {
-      "command": "uvx",
-      "args": ["mcp-telegram"],
-      "env": {
-        "TELEGRAM_API_ID": "${TELEGRAM_API_ID}",
-        "TELEGRAM_API_HASH": "${TELEGRAM_API_HASH}",
-        "TELEGRAM_PHONE": "${TELEGRAM_PHONE}"
-      }
-    }
-  }
+  "license": "MIT"
 }

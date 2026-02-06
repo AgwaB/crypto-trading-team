@@ -141,14 +141,13 @@ pending_actions:
 
 ### Phase 7: Telegram Notification (if configured)
 
-1. Check if Telegram MCP is available
-2. If available, send retrospective summary:
+1. Run `.crypto/scripts/send_telegram.sh` with retrospective summary:
    - Cycle number and date
    - Strategies analyzed, approved, rejected counts
    - Top performer and underperformer
    - Key finding and recommended action
    - Any HR signals (probation warnings, promotion candidates)
-3. If not available, skip silently
+2. Script silently skips if not configured
 
 ## Output Files
 

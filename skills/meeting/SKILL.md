@@ -124,7 +124,7 @@ After meeting completes, send summary:
 - Ideas rejected (with reasons: duplicate, infeasible, etc.)
 - Top 3 most promising ideas
 
-Check if Telegram MCP is available first. Skip silently if not configured.
+Run `.crypto/scripts/send_telegram.sh` with the formatted message. Script silently skips if not configured.
 
 ## Output
 

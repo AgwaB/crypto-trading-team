@@ -103,12 +103,11 @@ This skill runs the full autonomous strategy development pipeline from ideation 
     - Extract learnings via Feedback Agent (whether pass or fail)
 
 15. **Telegram Notification** (if configured):
-    - Check if Telegram MCP is available (test for `send_message` tool)
-    - If available, send pipeline result notification:
+    - Run `.crypto/scripts/send_telegram.sh` with pipeline result notification:
       - Strategy name and ID
       - Result: VALIDATED or REJECTED (with tier and reason)
       - Key metrics (Sharpe, PF, Win Rate, Max Drawdown)
-    - If not available, skip silently
+    - Script silently skips if not configured
     - **IMPORTANT**: Never let notification failure block the pipeline
 
 16. **Present Evidence Chain** to user:
