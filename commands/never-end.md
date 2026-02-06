@@ -188,6 +188,117 @@ If not configured, skip silently.
     - ALL meeting ideas rejected: run new meeting
     - Some ideas remain: try next idea (skip to step 3)
 
+## Self-Managing Company Lifecycle
+
+The never-end loop operates like a real company. These management protocols run automatically at specific intervals.
+
+### Every Iteration: Performance Logging
+
+After each iteration's results are recorded:
+
+1. **Log agent actions** to `.crypto/knowledge/agent-performance-log.yaml`:
+   - Which agents participated this iteration
+   - What each agent produced (ideas, reviews, backtests)
+   - Outcome: contributed to VALIDATED or REJECTED strategy
+   - Time taken per agent
+
+2. **Update team lead metrics**: Each team lead tracks their team's output
+
+### Every 5 Iterations: Team Retrospective
+
+**Trigger**: When `iteration % 5 == 0`
+
+Run the retrospective protocol (`/crypto:retrospective --force`):
+
+1. **Gather data** from last 5 iterations
+2. **Calculate per-agent metrics**:
+   - Ideas proposed → L0 pass rate (Research team)
+   - False positive/negative rates (Validation team)
+   - Code quality and deployment success (Execution team)
+3. **Update composite scores** in `.crypto/config/agent-performance-schema.yaml`
+4. **Generate report** at `.crypto/reports/retrospectives/RETRO-{NNN}.md`
+5. **Identify patterns**: What's working? What's not?
+6. **Send Telegram notification** with retrospective summary (if configured)
+
+After retrospective, **continue the loop** — do NOT stop.
+
+### Every 10 Iterations: Performance Review & HR Actions
+
+**Trigger**: When `iteration % 10 == 0`
+
+Run the HR review protocol (`/crypto:hr review`):
+
+1. **Aggregate performance** across last 2 retrospective cycles
+2. **Rank all agents** by composite score
+3. **Identify actions needed**:
+
+   **Probation** (score < 0.3 for 2+ cycles):
+   - Set agent status to `probation` in performance schema
+   - Notify team lead
+   - Agent gets 1 more cycle to improve
+
+   **Termination** (score < 0.2 while on probation):
+   - Archive agent to `.crypto/archives/agents/`
+   - Remove from active roster
+   - Log to `.crypto/knowledge/hr-log.yaml`
+   - Notify via Telegram: "🚪 Agent terminated: {name}"
+
+   **Hiring** (capability gap or capacity shortage detected):
+   - Check if any role needs filling (terminated agent replacement, new capability)
+   - Create new agent from template in `.crypto/config/agent-templates/`
+   - Add to appropriate team
+   - Set status to `probation`
+   - Notify via Telegram: "👤 New hire: {name}"
+
+   **Promotion** (score > 0.85 for 3+ cycles):
+   - Consider for team lead role if vacancy exists
+   - Log recognition in performance schema
+   - Notify via Telegram: "⭐ Promotion: {name}"
+
+4. **Generate review report** at `.crypto/reports/reviews/REVIEW-{NNN}.md`
+5. **Send Telegram notification** with team health summary (if configured)
+
+After HR review, **continue the loop** — do NOT stop.
+
+### Every 20 Iterations: Organizational Review
+
+**Trigger**: When `iteration % 20 == 0`
+
+Review the overall company structure:
+
+1. **Team balance**: Are teams properly sized? Any team overloaded?
+2. **Strategy diversity**: Are we exploring enough different approaches?
+3. **Resource allocation**: Should any agent be moved between teams?
+4. **Search space coverage**: Check `.crypto/knowledge/search-space-map.yaml`
+5. **Cost efficiency**: Which agents provide best ROI (validated strategies / compute cost)?
+
+Output organizational insights to `.crypto/reports/org-review/ORG-{NNN}.md`
+
+### Lifecycle Summary
+
+```
+Iteration 1:  Pipeline + Log
+Iteration 2:  Pipeline + Log
+Iteration 3:  Pipeline + Log
+Iteration 4:  Pipeline + Log
+Iteration 5:  Pipeline + Log + 📋 RETROSPECTIVE
+Iteration 6:  Pipeline + Log
+Iteration 7:  Pipeline + Log
+Iteration 8:  Pipeline + Log
+Iteration 9:  Pipeline + Log
+Iteration 10: Pipeline + Log + 📋 RETROSPECTIVE + 👔 HR REVIEW
+Iteration 11-19: (repeat pattern)
+Iteration 20: Pipeline + Log + 📋 RETROSPECTIVE + 👔 HR REVIEW + 🏢 ORG REVIEW
+```
+
+### Important Rules
+
+1. **Never stop for management tasks**: Retrospectives, reviews, and HR actions are part of the loop — complete them and continue
+2. **Log everything**: All management decisions go to `.crypto/knowledge/hr-log.yaml`
+3. **Telegram notifications**: Send summaries for all management events (if configured)
+4. **Agent changes take effect immediately**: New hires join next iteration, terminated agents are removed
+5. **Team leads coordinate**: Route tasks through Research Lead, Validation Lead, Execution Lead
+
 ## 24/7 Expansion Protocol
 
 When the meeting produces no NOVEL ideas (all DUPLICATE or SIMILAR):
