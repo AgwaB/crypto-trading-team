@@ -58,12 +58,29 @@ RESTART_EOF
   exit 0
 }
 
+# --- User abort detection ---
+# Respect Ctrl+C and other user abort signals. Allow exit without restart.
+USER_REQUESTED=$(echo "$HOOK_INPUT" | jq -r '(.user_requested // .userRequested // false)' 2>/dev/null || echo "false")
+STOP_REASON=$(echo "$HOOK_INPUT" | jq -r '(.stop_reason // .stopReason // "") | ascii_downcase' 2>/dev/null || echo "")
+
+if [[ "$USER_REQUESTED" == "true" ]]; then
+  rm -f "$BLOCK_COUNTER_FILE"
+  echo '{"continue": true}'
+  exit 0
+fi
+
+for abort_pattern in aborted abort cancel interrupt user_cancel user_interrupt ctrl_c manual_stop; do
+  if [[ "$STOP_REASON" == "$abort_pattern" ]] || [[ "$STOP_REASON" == *"user_cancel"* ]] || [[ "$STOP_REASON" == *"user_interrupt"* ]] || [[ "$STOP_REASON" == *"ctrl_c"* ]]; then
+    rm -f "$BLOCK_COUNTER_FILE"
+    echo '{"continue": true}'
+    exit 0
+  fi
+done
+
 # --- Context limit detection (PRIMARY) ---
 # When context is exhausted, Claude cannot process any continuation prompt.
 # Blocking these stops causes a deadlock. Instead, allow exit and auto-restart.
 # This mirrors the approach used by OMC's persistent-mode.mjs (issue #213).
-STOP_REASON=$(echo "$HOOK_INPUT" | jq -r '(.stop_reason // .stopReason // "") | ascii_downcase' 2>/dev/null || echo "")
-
 for pattern in context_limit context_window context_exceeded context_full max_context token_limit max_tokens conversation_too_long input_too_long; do
   if [[ "$STOP_REASON" == *"$pattern"* ]]; then
     do_auto_restart "Context limit detected via stop_reason ($STOP_REASON)"
@@ -73,11 +90,11 @@ done
 # --- Transcript-based context limit detection (BACKUP) ---
 # Some Claude Code versions may not set stop_reason. Check transcript for the
 # "Context limit reached" message that Claude Code displays.
+# Only match specific system messages, not general assistant text.
 TRANSCRIPT_PATH=$(echo "$HOOK_INPUT" | jq -r '.transcript_path // empty' 2>/dev/null || echo "")
 if [[ -n "$TRANSCRIPT_PATH" ]] && [[ -f "$TRANSCRIPT_PATH" ]]; then
-  # Check last few lines of transcript for context limit message
   LAST_LINES=$(tail -5 "$TRANSCRIPT_PATH" 2>/dev/null || echo "")
-  if echo "$LAST_LINES" | grep -qi 'context.limit.reached\|context.*limit\|/compact or /clear to continue' 2>/dev/null; then
+  if echo "$LAST_LINES" | grep -qi 'context.limit.reached\|/compact or /clear to continue' 2>/dev/null; then
     do_auto_restart "Context limit detected via transcript"
   fi
 fi
@@ -111,7 +128,10 @@ else
 fi
 
 # Check if THIS session is actually a never-end session
-TRANSCRIPT_PATH=$(echo "$HOOK_INPUT" | jq -r '.transcript_path' 2>/dev/null || echo "")
+# (TRANSCRIPT_PATH already extracted above for context limit detection)
+if [[ -z "${TRANSCRIPT_PATH:-}" ]]; then
+  TRANSCRIPT_PATH=$(echo "$HOOK_INPUT" | jq -r '.transcript_path // empty' 2>/dev/null || echo "")
+fi
 
 if [[ -z "$TRANSCRIPT_PATH" ]] || [[ ! -f "$TRANSCRIPT_PATH" ]]; then
   exit 0
