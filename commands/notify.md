@@ -12,7 +12,13 @@ Send a notification message to the configured Telegram chat.
 Telegram notifications are **optional**. To enable:
 
 1. Get API credentials from https://my.telegram.org/apps
-2. Set environment variables:
+2. Copy `.env.example` to `.env` and fill in your credentials:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your values
+   ```
+
+   Or set environment variables directly:
    ```bash
    export TELEGRAM_API_ID="your_api_id"
    export TELEGRAM_API_HASH="your_api_hash"

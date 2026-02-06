@@ -47,7 +47,17 @@ echo "  /crypto:status"
 
 ## Changelog
 
-### v0.9.0 (Latest)
+### v0.9.2 (Latest)
+- Add .env file support for Telegram configuration
+- Add .gitignore to protect secrets
+
+### v0.9.1
+- Fix user-abort detection and tighten transcript grep
+- Detect context limit in stop hook to prevent deadlock
+- Prevent never-end loop crash on context limit
+- Improve crypto:update command with auto-execution
+
+### v0.9.0
 - Self-managing company architecture
 - 20 agents (3 team leads + 17 specialists)
 - Automated retrospectives every 5 pipeline runs
