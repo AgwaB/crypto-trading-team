@@ -1,5 +1,5 @@
 ---
-name: trading-stop
+name: crypto:never-end-stop
 description: "Stop the running never-end loop gracefully. Use when the user says 'stop', 'crypto stop', or wants to halt the 24/7 autonomous discovery."
 user-invocable: true
 argument-hint: "[--force] [--summary]"
