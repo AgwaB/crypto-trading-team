@@ -17,11 +17,76 @@ if [[ ! -f "$STATE_FILE" ]]; then
   exit 0
 fi
 
-# --- Rapid-fire detection ---
-# If the hook has blocked multiple times within a short window, Claude likely
-# can't continue (context limit reached). Allow graceful exit with state preserved.
+# --- Auto-restart helper ---
+# Called when context limit is detected. Allows exit and queues restart.
+do_auto_restart() {
+  local reason="$1"
+  echo "Never-End: $reason — allowing exit for auto-restart..." >&2
+
+  WORK_DIR="$(pwd)"
+  RESTART_PROMPT="NEVER-END-SESSION-ACTIVE. Context limit was reached in previous session. Read .crypto/never-end-state.md and continue the 24/7 strategy discovery loop from where it left off. Run /compact proactively every iteration."
+
+  # Try auto-restart via tmux
+  if [[ -n "${TMUX:-}" ]]; then
+    PANE_ID=$(tmux display-message -p '#{pane_id}' 2>/dev/null || echo "")
+    if [[ -n "$PANE_ID" ]]; then
+      # Small delay so current session fully exits before restart
+      tmux send-keys -t "$PANE_ID" "sleep 2 && cd '$WORK_DIR' && claude -p '$RESTART_PROMPT'" Enter 2>/dev/null && {
+        echo "Never-End: Auto-restart queued via tmux." >&2
+      }
+    fi
+  fi
+
+  # Always write restart script as fallback
+  mkdir -p "$WORK_DIR/.crypto" 2>/dev/null || true
+  RESTART_SCRIPT="$WORK_DIR/.crypto/never-end-restart.sh"
+  cat > "$RESTART_SCRIPT" << RESTART_EOF
+#!/bin/bash
+cd "$WORK_DIR"
+exec claude -p "$RESTART_PROMPT"
+RESTART_EOF
+  chmod +x "$RESTART_SCRIPT" 2>/dev/null || true
+
+  if [[ -z "${TMUX:-}" ]]; then
+    echo "Never-End: Session state preserved. To resume:" >&2
+    echo "  bash $RESTART_SCRIPT" >&2
+  fi
+
+  rm -f "$BLOCK_COUNTER_FILE"
+  # CRITICAL: Output proper JSON so Claude Code knows to allow exit
+  echo '{"continue": true}'
+  exit 0
+}
+
+# --- Context limit detection (PRIMARY) ---
+# When context is exhausted, Claude cannot process any continuation prompt.
+# Blocking these stops causes a deadlock. Instead, allow exit and auto-restart.
+# This mirrors the approach used by OMC's persistent-mode.mjs (issue #213).
+STOP_REASON=$(echo "$HOOK_INPUT" | jq -r '(.stop_reason // .stopReason // "") | ascii_downcase' 2>/dev/null || echo "")
+
+for pattern in context_limit context_window context_exceeded context_full max_context token_limit max_tokens conversation_too_long input_too_long; do
+  if [[ "$STOP_REASON" == *"$pattern"* ]]; then
+    do_auto_restart "Context limit detected via stop_reason ($STOP_REASON)"
+  fi
+done
+
+# --- Transcript-based context limit detection (BACKUP) ---
+# Some Claude Code versions may not set stop_reason. Check transcript for the
+# "Context limit reached" message that Claude Code displays.
+TRANSCRIPT_PATH=$(echo "$HOOK_INPUT" | jq -r '.transcript_path // empty' 2>/dev/null || echo "")
+if [[ -n "$TRANSCRIPT_PATH" ]] && [[ -f "$TRANSCRIPT_PATH" ]]; then
+  # Check last few lines of transcript for context limit message
+  LAST_LINES=$(tail -5 "$TRANSCRIPT_PATH" 2>/dev/null || echo "")
+  if echo "$LAST_LINES" | grep -qi 'context.limit.reached\|context.*limit\|/compact or /clear to continue' 2>/dev/null; then
+    do_auto_restart "Context limit detected via transcript"
+  fi
+fi
+
+# --- Rapid-fire detection (SAFETY NET) ---
+# If the hook has blocked multiple times within a short window, context is likely
+# exhausted even if we couldn't detect it above.
 MAX_RAPID_BLOCKS=2
-RAPID_WINDOW_SECS=60
+RAPID_WINDOW_SECS=120
 NOW=$(date +%s)
 
 if [[ -f "$BLOCK_COUNTER_FILE" ]]; then
@@ -32,35 +97,7 @@ if [[ -f "$BLOCK_COUNTER_FILE" ]]; then
   if [[ $ELAPSED -lt $RAPID_WINDOW_SECS ]]; then
     BLOCK_COUNT=$((BLOCK_COUNT + 1))
     if [[ $BLOCK_COUNT -ge $MAX_RAPID_BLOCKS ]]; then
-      # Too many blocks in quick succession — context limit likely reached
-      # Auto-restart: spawn a fresh session to continue the loop
-      echo "Never-End: Context limit detected — auto-restarting fresh session..." >&2
-      rm -f "$BLOCK_COUNTER_FILE"
-
-      WORK_DIR="$(pwd)"
-      RESTART_PROMPT="NEVER-END-SESSION-ACTIVE. Context limit was reached in previous session. Read .crypto/never-end-state.md and continue the 24/7 strategy discovery loop from where it left off. Run /compact proactively every iteration."
-
-      # Try auto-restart methods in order of preference
-      if [[ -n "${TMUX:-}" ]]; then
-        # Running in tmux — send command to current pane after session exits
-        PANE_ID=$(tmux display-message -p '#{pane_id}')
-        tmux send-keys -t "$PANE_ID" "cd '$WORK_DIR' && claude -p '$RESTART_PROMPT'" Enter 2>/dev/null && {
-          echo "Never-End: Auto-restart queued via tmux." >&2
-          exit 0
-        }
-      fi
-
-      # Fallback: write restart script
-      RESTART_SCRIPT="$WORK_DIR/.crypto/never-end-restart.sh"
-      cat > "$RESTART_SCRIPT" << RESTART_EOF
-#!/bin/bash
-cd "$WORK_DIR"
-exec claude -p "$RESTART_PROMPT"
-RESTART_EOF
-      chmod +x "$RESTART_SCRIPT"
-      echo "Never-End: Session state preserved. Auto-restart:" >&2
-      echo "  bash $RESTART_SCRIPT" >&2
-      exit 0
+      do_auto_restart "Rapid-fire blocks detected ($BLOCK_COUNT in ${ELAPSED}s)"
     fi
     # Update counter
     printf '%s\n%s\n' "$LAST_BLOCK_TS" "$BLOCK_COUNT" > "$BLOCK_COUNTER_FILE"
