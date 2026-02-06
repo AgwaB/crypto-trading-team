@@ -67,6 +67,26 @@ Parse arguments from: $ARGUMENTS
 - If `--fresh` is present, skip the resume prompt and start fresh
 - If FOCUS_AREA is provided, focus all agents on that area
 
+### Step 2: Telegram Start Notification
+
+If Telegram MCP is available, send session start notification:
+```
+🚀 **Never-End Session Started**
+━━━━━━━━━━━━━━━━━━━━━━
+Max Iterations: {N or "Unlimited"}
+Focus Area: {area or "All"}
+Resume: {Yes/No}
+
+Notifications will be sent:
+  • Every iteration: result
+  • Every 5 iterations: status summary
+  • Every 10 iterations: team health
+  • On stop: final report
+🕐 {timestamp}
+```
+
+If not configured, skip silently.
+
 ## Critical Rules
 
 1. **Read Bootstrap First**: Always start by reading:
@@ -211,6 +231,52 @@ Running total: {validated}/{rejected}/{total}
 Scout runs: {count} | Mutator runs: {count}
 ```
 
+### Telegram Notification (if configured)
+
+After each iteration, send a brief update to Telegram:
+
+**Every iteration** — send result:
+```
+📊 **Never-End Iteration {N}**
+Strategy: STR-{NNN} ({name})
+Result: ✅ VALIDATED / ❌ REJECTED at {tier}
+Running: {validated}V / {rejected}R / {total}T
+```
+
+**Every 5 iterations** — send status summary:
+```
+📈 **Never-End Status Update**
+━━━━━━━━━━━━━━━━━━━━━━
+Session Duration: {hours}h {minutes}m
+Iterations: {N}
+Strategies: {validated} validated / {rejected} rejected
+Win Rate: {validated/total * 100}%
+Scout Runs: {count} | Mutator Runs: {count}
+
+Recent Validated:
+{list of last 3 validated strategies}
+
+Next: Continuing autonomous discovery...
+🕐 {timestamp}
+```
+
+**Every 10 iterations** (after retrospective) — send team health:
+```
+📋 **Team Health Report**
+━━━━━━━━━━━━━━━━━━━━━━
+Pipeline Efficiency:
+  • L0 rejection rate: {x}%
+  • Average time to validate: {y}min
+
+Top Agent: {name} ({score})
+Watch: {name} ({score})
+
+HR Actions Pending: {count}
+🕐 {timestamp}
+```
+
+Check if Telegram MCP is available before sending. If not configured, skip silently.
+
 ## Manual Stop
 
 To stop this loop, the user must explicitly type "stop" or `/crypto:stop` or press Ctrl+C. Do NOT stop on your own — keep running indefinitely.
@@ -229,8 +295,20 @@ if exists('.crypto/never-end-stop-signal'):
        - Strategies validated/rejected
        - Scout/Mutator run counts
     4. Delete .crypto/never-end-stop-signal
-    5. Output: "Never-end session stopped gracefully."
-    6. EXIT (do not continue loop)
+    5. Send Telegram notification (if configured):
+       ```
+       🛑 **Never-End Session Stopped**
+       ━━━━━━━━━━━━━━━━━━━━━━━━
+       Duration: {duration}
+       Iterations: {N}
+       Strategies: {validated} validated / {rejected} rejected
+       Scout Runs: {scout_count} | Mutator Runs: {mutator_count}
+
+       Session ended gracefully.
+       🕐 {timestamp}
+       ```
+    6. Output: "Never-end session stopped gracefully."
+    7. EXIT (do not continue loop)
 ```
 
 The `/crypto:stop` command creates this signal file.
