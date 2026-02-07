@@ -67,9 +67,11 @@ Parse arguments from: $ARGUMENTS
 - If `--fresh` is present, skip the resume prompt and start fresh
 - If FOCUS_AREA is provided, focus all agents on that area
 
-### Step 2: Telegram Start Notification
+### Step 2: Telegram Notification Check
 
-If Telegram MCP is available, send session start notification:
+Check if Telegram is configured by reading `.crypto/.env` for non-empty `TELEGRAM_BOT_TOKEN`:
+
+**If configured**, send session start notification:
 ```
 🚀 **Never-End Session Started**
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -85,7 +87,14 @@ Notifications will be sent:
 🕐 {timestamp}
 ```
 
-If not configured, skip silently.
+**If NOT configured**, display a visible warning to the user:
+```
+⚠️ Telegram notifications not configured.
+   You won't receive iteration alerts on your phone.
+   Run /crypto:notify for setup guide (takes 2 minutes).
+   Continuing without notifications...
+```
+Then continue — do NOT block the session.
 
 ## Critical Rules
 

@@ -1154,9 +1154,18 @@ Timeframe codes:
    Performance Tracking: Enabled (agent-performance-schema.yaml, agent-performance-log.yaml)
    Pipeline: Insight -> Feedback -> L0 -> L1 -> L2 -> Critic -> L3 -> Risk -> [HUMAN]
 
+   Telegram: Not configured. Run /crypto:notify for setup guide.
    Next: /crypto:pipeline to start developing strategies.
    Next: /crypto:pipeline meeting to run a strategy brainstorming session.
    ```
+
+**Telegram Setup Prompt**: After outputting the confirmation, check if `.crypto/.env` has non-empty `TELEGRAM_BOT_TOKEN`:
+- If **empty or missing**: Display the above with "Telegram: Not configured" and add:
+  ```
+  💡 Want iteration alerts on your phone?
+     Run /crypto:notify for Telegram setup guide (takes 2 minutes).
+  ```
+- If **configured**: Display "Telegram: Configured ✓" instead.
 
 Replace `{current_date}` with the actual current date in ISO format when creating files.
 
