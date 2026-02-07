@@ -270,12 +270,12 @@ if [[ $((NEXT_ITERATION % 5)) -eq 0 ]]; then
   RETRO_NUM=$((NEXT_ITERATION / 5))
   LIFECYCLE_INSTRUCTIONS="${LIFECYCLE_INSTRUCTIONS}
 ⚠️ MANDATORY: This is iteration $NEXT_ITERATION (divisible by 5).
-BEFORE starting pipeline work, run a team retrospective:
+BEFORE starting workflow, run a team retrospective:
 1. Read .crypto/knowledge/agent-performance-log.yaml for last 5 iterations
 2. Calculate per-agent metrics (ideas proposed, L0 pass rate, violations)
 3. Write report to .crypto/reports/retrospectives/RETRO-$(printf '%03d' $RETRO_NUM).md
 4. Send retrospective summary to Telegram (if configured)
-5. THEN continue with iteration $NEXT_ITERATION pipeline work
+5. THEN continue with iteration $NEXT_ITERATION workflow
 "
   LAST_RETRO=$NEXT_ITERATION
 fi
@@ -322,7 +322,7 @@ ${LIFECYCLE_INSTRUCTIONS}
 Instructions:
 1. Read .crypto/BOOTSTRAP.md for current state
 2. Check .crypto/knowledge/registry.yaml for recent results
-3. Run the next iteration of the pipeline (Phase 0-2)
+3. Run the next iteration of the workflow (Phase 0-2)
 4. After screening, log agent performance to .crypto/knowledge/agent-performance-log.yaml
 5. If meeting produces no NOVEL ideas, run External Scout and Strategy Mutator
 6. Report results at end of iteration

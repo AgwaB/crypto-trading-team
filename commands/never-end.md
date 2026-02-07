@@ -111,6 +111,12 @@ If not configured, skip silently.
    - If you notice the conversation growing large, compact IMMEDIATELY before starting the next iteration
    - **This is mandatory — failing to compact will crash the session**
 
+6. **KEYWORD AVOIDANCE (CRITICAL)**: The OMC plugin detects certain keywords in conversation and injects unwanted skill invocations. In ALL your output text, iteration reports, and agent prompts, NEVER use these exact words:
+   - Do NOT write "pipeline" — use "workflow" or "validation cycle" instead
+   - Do NOT write "autopilot" — use "autonomous mode" or "never-end mode" instead
+   - Do NOT write "ultrawork" — use "parallel execution" instead
+   - This applies to your conversation output only, not to file contents or code
+
 ## Anti-Tunnel-Vision Protocol
 
 The loop MUST prevent fixating on a single strategy architecture. These checks are MANDATORY.
@@ -197,7 +203,7 @@ exploration_budget:
 - `consecutive_same_family > 50`: FORCE architecture pivot (see Diversity Budget above)
 - `last_novel_architecture` > 100 iterations ago: IMMEDIATE pivot required
 
-## Pipeline Per Iteration
+## Workflow Per Iteration
 
 ### Phase 0: Pre-Pipeline (Ideation + Screening)
 
@@ -363,18 +369,18 @@ Output organizational insights to `.crypto/reports/org-review/ORG-{NNN}.md`
 ### Lifecycle Summary
 
 ```
-Iteration 1:  Pipeline + Log
-Iteration 2:  Pipeline + Log
-Iteration 3:  Pipeline + Log
-Iteration 4:  Pipeline + Log
-Iteration 5:  Pipeline + Log + 📋 RETROSPECTIVE
-Iteration 6:  Pipeline + Log
-Iteration 7:  Pipeline + Log
-Iteration 8:  Pipeline + Log
-Iteration 9:  Pipeline + Log
-Iteration 10: Pipeline + Log + 📋 RETROSPECTIVE + 👔 HR REVIEW
+Iteration 1:  Workflow + Log
+Iteration 2:  Workflow + Log
+Iteration 3:  Workflow + Log
+Iteration 4:  Workflow + Log
+Iteration 5:  Workflow + Log + 📋 RETROSPECTIVE
+Iteration 6:  Workflow + Log
+Iteration 7:  Workflow + Log
+Iteration 8:  Workflow + Log
+Iteration 9:  Workflow + Log
+Iteration 10: Workflow + Log + 📋 RETROSPECTIVE + 👔 HR REVIEW
 Iteration 11-19: (repeat pattern)
-Iteration 20: Pipeline + Log + 📋 RETROSPECTIVE + 👔 HR REVIEW + 🏢 ORG REVIEW
+Iteration 20: Workflow + Log + 📋 RETROSPECTIVE + 👔 HR REVIEW + 🏢 ORG REVIEW
 ```
 
 ### Important Rules
@@ -461,7 +467,7 @@ Next: Continuing autonomous discovery...
 ```
 📋 **Team Health Report**
 ━━━━━━━━━━━━━━━━━━━━━━
-Pipeline Efficiency:
+Workflow Efficiency:
   • L0 rejection rate: {x}%
   • Average time to validate: {y}min
 
