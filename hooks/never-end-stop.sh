@@ -17,6 +17,19 @@ if [[ ! -f "$STATE_FILE" ]]; then
   exit 0
 fi
 
+# --- Clean OMC state to prevent hook interference ---
+# OMC autopilot/ralph hooks also block stop events.
+# When never-end is active, it takes priority. Clean OMC state
+# so those hooks don't also fire and create conflicting blocks.
+for omc_state in .omc/state/autopilot-state.json .omc/state/ralph-state.json .omc/state/ultrawork-state.json .omc/state/ecomode-state.json; do
+  rm -f "$omc_state" 2>/dev/null || true
+done
+
+# Also clean global OMC state (hook reads from ~/.omc/state/ too)
+for omc_state in "$HOME/.omc/state/autopilot-state.json" "$HOME/.omc/state/ralph-state.json" "$HOME/.omc/state/ultrawork-state.json" "$HOME/.omc/state/ecomode-state.json"; do
+  rm -f "$omc_state" 2>/dev/null || true
+done
+
 # --- Auto-restart helper ---
 # Called when context limit is detected. Allows exit and queues restart.
 do_auto_restart() {
@@ -206,6 +219,10 @@ STRATEGIES_FOUND=$(echo "$FRONTMATTER" | grep '^strategies_found:' | sed 's/stra
 STRATEGIES_REJECTED=$(echo "$FRONTMATTER" | grep '^strategies_rejected:' | sed 's/strategies_rejected: *//' || echo "0")
 SCOUT_RUNS=$(echo "$FRONTMATTER" | grep '^scout_runs:' | sed 's/scout_runs: *//' || echo "0")
 MUTATOR_RUNS=$(echo "$FRONTMATTER" | grep '^mutator_runs:' | sed 's/mutator_runs: *//' || echo "0")
+LAST_RETRO=$(echo "$FRONTMATTER" | grep '^last_retrospective:' | sed 's/last_retrospective: *//')
+LAST_RETRO=${LAST_RETRO:-0}
+LAST_HR=$(echo "$FRONTMATTER" | grep '^last_hr_review:' | sed 's/last_hr_review: *//')
+LAST_HR=${LAST_HR:-0}
 
 # Validate
 if [[ ! "$ITERATION" =~ ^[0-9]+$ ]] || [[ ! "$MAX_ITERATIONS" =~ ^[0-9]+$ ]]; then
@@ -245,6 +262,53 @@ fi
 # Increment iteration
 NEXT_ITERATION=$((ITERATION + 1))
 
+# === LIFECYCLE CHECKS ===
+LIFECYCLE_INSTRUCTIONS=""
+
+# Every 5 iterations: Retrospective (fires AT iteration 5,10,15,20...)
+if [[ $((NEXT_ITERATION % 5)) -eq 0 ]]; then
+  RETRO_NUM=$((NEXT_ITERATION / 5))
+  LIFECYCLE_INSTRUCTIONS="${LIFECYCLE_INSTRUCTIONS}
+⚠️ MANDATORY: This is iteration $NEXT_ITERATION (divisible by 5).
+BEFORE starting pipeline work, run a team retrospective:
+1. Read .crypto/knowledge/agent-performance-log.yaml for last 5 iterations
+2. Calculate per-agent metrics (ideas proposed, L0 pass rate, violations)
+3. Write report to .crypto/reports/retrospectives/RETRO-$(printf '%03d' $RETRO_NUM).md
+4. Send retrospective summary to Telegram (if configured)
+5. THEN continue with iteration $NEXT_ITERATION pipeline work
+"
+  LAST_RETRO=$NEXT_ITERATION
+fi
+
+# Every 10 iterations: HR Review (fires AT iteration 10,20,30...)
+if [[ $((NEXT_ITERATION % 10)) -eq 0 ]]; then
+  HR_NUM=$((NEXT_ITERATION / 10))
+  LIFECYCLE_INSTRUCTIONS="${LIFECYCLE_INSTRUCTIONS}
+⚠️ MANDATORY: This is iteration $NEXT_ITERATION (divisible by 10).
+AFTER retrospective, run HR review:
+1. Aggregate performance across last 2 retrospective cycles
+2. Rank all agents by composite score
+3. Flag probation (score < 0.3 for 2+ cycles) and termination candidates
+4. Write report to .crypto/reports/reviews/REVIEW-$(printf '%03d' $HR_NUM).md
+5. Update .crypto/signals/hr-actions.yaml with pending actions
+6. Send HR review summary to Telegram (if configured)
+"
+  LAST_HR=$NEXT_ITERATION
+fi
+
+# Every 20 iterations: Org Review (fires AT iteration 20,40,60...)
+if [[ $((NEXT_ITERATION % 20)) -eq 0 ]]; then
+  ORG_NUM=$((NEXT_ITERATION / 20))
+  LIFECYCLE_INSTRUCTIONS="${LIFECYCLE_INSTRUCTIONS}
+⚠️ MANDATORY: This is iteration $NEXT_ITERATION (divisible by 20).
+AFTER HR review, run org review:
+1. Check team balance and sizing
+2. Review strategy diversity (architecture_distribution)
+3. Check search space coverage
+4. Write report to .crypto/reports/org-review/ORG-$(printf '%03d' $ORG_NUM).md
+"
+fi
+
 # Build continuation prompt
 PROMPT_TEXT="Continue the 24/7 autonomous strategy discovery loop.
 
@@ -254,13 +318,14 @@ Current state:
 - Strategies rejected: $STRATEGIES_REJECTED
 - Scout runs: $SCOUT_RUNS
 - Mutator runs: $MUTATOR_RUNS
-
+${LIFECYCLE_INSTRUCTIONS}
 Instructions:
 1. Read .crypto/BOOTSTRAP.md for current state
 2. Check .crypto/knowledge/registry.yaml for recent results
 3. Run the next iteration of the pipeline (Phase 0-2)
-4. If meeting produces no NOVEL ideas, run External Scout and Strategy Mutator
-5. Report results at end of iteration
+4. After screening, log agent performance to .crypto/knowledge/agent-performance-log.yaml
+5. If meeting produces no NOVEL ideas, run External Scout and Strategy Mutator
+6. Report results at end of iteration
 
 Remember: This loop NEVER stops on its own. Keep discovering strategies until manually stopped or you output <never-end-complete>."
 
@@ -274,6 +339,8 @@ strategies_found: $STRATEGIES_FOUND
 strategies_rejected: $STRATEGIES_REJECTED
 scout_runs: $SCOUT_RUNS
 mutator_runs: $MUTATOR_RUNS
+last_retrospective: $LAST_RETRO
+last_hr_review: $LAST_HR
 started: $(echo "$FRONTMATTER" | grep '^started:' | sed 's/started: *//' || date -Iseconds)
 ---
 

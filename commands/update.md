@@ -10,84 +10,75 @@ Update the crypto-trading-team plugin to the latest version.
 
 Execute these commands in sequence:
 
-### Step 1: Clear plugin cache
+### Step 1: Pull latest from GitHub
 ```bash
-rm -rf ~/.claude/plugins/cache/crypto-trading-team/
-echo "✅ Plugin cache cleared"
+cd ~/.claude/plugins/marketplaces/crypto-trading-team 2>/dev/null && git fetch origin && git pull origin main && echo "✅ Pulled latest from GitHub" || echo "⚠️ Local marketplace not found"
 ```
 
-### Step 2: Pull latest from GitHub
+### Step 2: Read version and rebuild cache
 ```bash
-cd ~/.claude/plugins/marketplaces/crypto-trading-team 2>/dev/null && git fetch origin && git pull origin main && echo "✅ Pulled latest from GitHub" || echo "⚠️ Local marketplace not found - will fetch from GitHub on restart"
+SOURCE_DIR="$HOME/.claude/plugins/marketplaces/crypto-trading-team"
+VERSION=$(cat "$SOURCE_DIR/.claude-plugin/plugin.json" 2>/dev/null | grep '"version"' | sed 's/.*"\([0-9][^"]*\)".*/\1/' || echo "unknown")
+CACHE_DIR="$HOME/.claude/plugins/cache/crypto-trading-team/crypto/$VERSION"
+
+# Create cache directory if needed
+mkdir -p "$CACHE_DIR"
+
+# Sync source to cache (preserving cache-specific files like tests, docs)
+rsync -av --delete --exclude='.git' --exclude='.git/' "$SOURCE_DIR/" "$CACHE_DIR/"
+
+echo ""
+echo "✅ Cache rebuilt: $CACHE_DIR"
+echo "   Version: $VERSION"
 ```
 
-### Step 3: Show version info
+### Step 3: Clean stale state files
+```bash
+# Remove stale OMC autopilot state (global)
+rm -f "$HOME/.omc/state/autopilot-state.json" 2>/dev/null
+rm -f "$HOME/.omc/state/ralph-state.json" 2>/dev/null
+rm -f "$HOME/.omc/state/ultrawork-state.json" 2>/dev/null
+rm -f "$HOME/.omc/state/ecomode-state.json" 2>/dev/null
+
+# Remove stale OMC autopilot state (project-local)
+rm -f .omc/state/autopilot-state.json 2>/dev/null
+rm -f .omc/state/ralph-state.json 2>/dev/null
+rm -f .omc/state/ultrawork-state.json 2>/dev/null
+rm -f .omc/state/ecomode-state.json 2>/dev/null
+
+echo "✅ Stale state files cleaned"
+```
+
+### Step 4: Show update summary
 ```bash
 echo ""
 echo "═══════════════════════════════════════════"
-echo " CRYPTO TRADING TEAM — UPDATE STATUS"
+echo " CRYPTO TRADING TEAM — UPDATE COMPLETE"
 echo "═══════════════════════════════════════════"
 echo ""
-LOCAL_VERSION=$(cat ~/.claude/plugins/marketplaces/crypto-trading-team/.claude-plugin/plugin.json 2>/dev/null | grep '"version"' | sed 's/.*"version".*"\([^"]*\)".*/\1/' || echo "unknown")
-echo "  Version: $LOCAL_VERSION"
+SOURCE_DIR="$HOME/.claude/plugins/marketplaces/crypto-trading-team"
+VERSION=$(cat "$SOURCE_DIR/.claude-plugin/plugin.json" 2>/dev/null | grep '"version"' | sed 's/.*"\([0-9][^"]*\)".*/\1/' || echo "unknown")
+COMMIT=$(cd "$SOURCE_DIR" 2>/dev/null && git log --oneline -1 2>/dev/null || echo "unknown")
+echo "  Version: $VERSION"
+echo "  Commit:  $COMMIT"
+echo ""
+echo "  ✅ Changes are live — NO restart needed"
 echo ""
 echo "═══════════════════════════════════════════"
-echo ""
-echo "🔄 Restart Claude Code to apply the update."
-echo ""
-echo "After restart, verify with:"
-echo "  /crypto:status"
 ```
 
 ## What This Does
 
-1. **Clears cache**: Removes cached plugin files so Claude Code fetches fresh version
-2. **Pulls latest**: Updates from `AgwaB/crypto-trading-team` GitHub repo
-3. **Shows version**: Displays the installed version
-
-## Changelog
-
-### v0.9.2 (Latest)
-- Add .env file support for Telegram configuration
-- Add .gitignore to protect secrets
-
-### v0.9.1
-- Fix user-abort detection and tighten transcript grep
-- Detect context limit in stop hook to prevent deadlock
-- Prevent never-end loop crash on context limit
-- Improve crypto:update command with auto-execution
-
-### v0.9.0
-- Self-managing company architecture
-- 20 agents (3 team leads + 17 specialists)
-- Automated retrospectives every 5 pipeline runs
-- Performance scoring and dynamic HR
-
-### v0.8.0
-- 17 specialized agents
-- Organized folder structure
-- 24/7 never-end mode
+1. **Pulls latest**: Updates from GitHub repo
+2. **Rebuilds cache**: rsync copies source → cache immediately
+3. **Cleans state**: Removes stale OMC/autopilot state files
+4. **No restart needed**: Changes take effect immediately
 
 ## Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| Update doesn't apply | Restart Claude Code |
-| Version unchanged | Check `~/.claude/plugins/cache/` is empty |
 | Git pull fails | Run `cd ~/.claude/plugins/marketplaces/crypto-trading-team && git status` |
+| Cache rebuild fails | Check permissions on `~/.claude/plugins/cache/` |
 | Plugin not found | Run `/plugins` → look for "crypto" |
-
-## Manual Update
-
-```bash
-# 1. Clear cache
-rm -rf ~/.claude/plugins/cache/crypto-trading-team/
-
-# 2. Update marketplace (if local)
-cd ~/.claude/plugins/marketplaces/crypto-trading-team && git pull
-
-# 3. Restart Claude Code
-
-# 4. Verify
-/crypto:status
-```
+| Hooks still stale | Hooks are loaded at session start — start a new session |
